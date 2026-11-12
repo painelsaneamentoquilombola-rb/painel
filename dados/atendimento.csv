@@ -1,0 +1,23 @@
+﻿comunidade_id;componente;solucao;domicilios;classe_pnsr;observacao;fonte
+cedro;agua;Poço, nascente ou mina, canalizada dentro de casa;25;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022
+cedro;esgoto;Rede geral ou fossa séptica (declarado ao Censo);17;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022
+cedro;esgoto;Fossa rudimentar, vala, rio ou outra forma;8;precário;"precário ou sem atendimento; o Censo não separa";IBGE (2024), Censo 2022
+cedro;lixo;Coletado, direta ou indiretamente;21;adequado;;IBGE (2024), Censo 2022
+cedro;lixo;Queimado, enterrado ou outro destino na propriedade;4;sem atendimento;;IBGE (2024), Censo 2022
+regi;agua;Rede geral, canalizada dentro de casa;1;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022
+regi;agua;Poço, nascente ou mina, canalizada dentro de casa;54;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022
+regi;agua;Carro-pipa, água de chuva ou rio;3;precário;precário ou sem atendimento;IBGE (2024), Censo 2022
+regi;esgoto;Rede geral ou fossa séptica (declarado ao Censo);27;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022
+regi;esgoto;Fossa rudimentar, vala, rio ou outra forma;31;precário;"precário ou sem atendimento; o Censo não separa";IBGE (2024), Censo 2022
+regi;lixo;Coletado, direta ou indiretamente;56;adequado;;IBGE (2024), Censo 2022
+regi;lixo;Queimado, enterrado ou outro destino na propriedade;2;sem atendimento;;IBGE (2024), Censo 2022
+pppa;agua;Poço, nascente ou mina, canalizada dentro de casa;71;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022
+pppa;esgoto;Rede geral ou fossa séptica (declarado ao Censo);53;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022
+pppa;esgoto;Fossa rudimentar, vala, rio ou outra forma;18;precário;"precário ou sem atendimento; o Censo não separa";IBGE (2024), Censo 2022
+pppa;lixo;Coletado, direta ou indiretamente;55;adequado;;IBGE (2024), Censo 2022
+pppa;lixo;Queimado, enterrado ou outro destino na propriedade;16;sem atendimento;;IBGE (2024), Censo 2022
+rgts;agua;Poço, nascente ou mina, canalizada dentro de casa;48;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022
+rgts;esgoto;Rede geral ou fossa séptica (declarado ao Censo);20;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022
+rgts;esgoto;Fossa rudimentar, vala, rio ou outra forma;28;precário;"precário ou sem atendimento; o Censo não separa";IBGE (2024), Censo 2022
+rgts;lixo;Coletado, direta ou indiretamente;38;adequado;;IBGE (2024), Censo 2022
+rgts;lixo;Queimado, enterrado ou outro destino na propriedade;10;sem atendimento;;IBGE (2024), Censo 2022

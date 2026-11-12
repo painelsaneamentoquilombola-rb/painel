@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Saneamento Quilombola Barra do Turvo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cabeçalho, indicadores, matriz PNSR por comunidade com ficha ao lado (empilha no celular), leituras do município, exportação */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --ink:#15231e; --muted:#5a6b64; --line:#d8e1dc;
+  --brand:#0f5c4a; --brand-soft:#e1efe9;
+  --ok-bg:#dcefdf; --ok-fg:#1d5e2c; --av-bg:#dde9f4; --av-fg:#1f5684; --pr-bg:#f8e7c4; --pr-fg:#7a4d06; --no-bg:#f6d9d6; --no-fg:#8a231b; --nd-bg:#eceeed; --nd-fg:#6c7470;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1714; --surface:#16211d; --ink:#e4ece8; --muted:#9aaba4; --line:#2a3833;
+  --brand:#5fc3a4; --brand-soft:#1c3029;
+  --ok-bg:#1d3a25; --ok-fg:#9fdcaf; --av-bg:#1b2f42; --av-fg:#9cc8ee; --pr-bg:#3d2e12; --pr-fg:#f2c77a; --no-bg:#43201d; --no-fg:#f3a9a1; --nd-bg:#242d2a; --nd-fg:#98a39e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1714; --surface:#16211d; --ink:#e4ece8; --muted:#9aaba4; --line:#2a3833;
+  --brand:#5fc3a4; --brand-soft:#1c3029;
+  --ok-bg:#1d3a25; --ok-fg:#9fdcaf; --av-bg:#1b2f42; --av-fg:#9cc8ee; --pr-bg:#3d2e12; --pr-fg:#f2c77a; --no-bg:#43201d; --no-fg:#f3a9a1; --nd-bg:#242d2a; --nd-fg:#98a39e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:1160px;margin:0 auto;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,3.4vw,32px);line-height:1.1;margin:4px 0;text-wrap:balance}
+h2{font-family:var(--display);font-size:20px;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:14px;margin:0}
+.badge{font-family:var(--mono);font-size:11.5px;background:var(--av-bg);color:var(--av-fg);padding:3px 8px;border-radius:6px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+select,button{font:inherit;font-size:14px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;cursor:pointer}
+button:focus-visible,select:focus-visible,.row:focus-visible,summary:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:3px;align-content:start}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi .v{font-family:var(--display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.kpi .n{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.bar{height:6px;border-radius:3px;background:var(--nd-bg);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.main{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;min-width:0}
+.tablebox{overflow-x:auto}
+.grid{min-width:700px}
+.row{display:grid;grid-template-columns:minmax(0,1.45fr) repeat(5,minmax(0,1fr)) 58px;gap:8px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--brand-soft)}
+.row.sel{background:var(--brand-soft);box-shadow:inset 3px 0 0 var(--brand)}
+.hd{font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:default}
+.hd:hover{background:none}
+.name{font-weight:600}
+.name small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;white-space:nowrap}
+.ok{background:var(--ok-bg);color:var(--ok-fg)} .av{background:var(--av-bg);color:var(--av-fg)} .pr{background:var(--pr-bg);color:var(--pr-fg)} .no{background:var(--no-bg);color:var(--no-fg)} .nd{background:var(--nd-bg);color:var(--nd-fg);font-weight:400}
+.cell{display:grid;gap:4px;justify-items:start;border-radius:7px;cursor:help;padding:2px}
+.cell:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.cell .bar{width:100%;max-width:96px;height:4px}
+.cell .df{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.src{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;font-size:12.5px;color:var(--muted);padding:12px 14px;border-top:1px solid var(--line);align-items:center}
+.detail{padding:16px;display:grid;gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--nd-bg);color:var(--ink)}
+.chip.rds{background:var(--brand-soft);color:var(--brand)}
+.chip.warn{background:transparent;color:var(--pr-fg);border:1px solid var(--pr-fg)}
+.kv{display:grid;gap:8px}
+.kv div{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:14px;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.kv span:first-child{color:var(--muted)}
+.kv .num{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.note{font-size:13.5px;color:var(--muted);background:var(--bg);border-radius:8px;padding:10px 12px;margin:0}
+.mini{width:100%;border-collapse:collapse;font-size:13px}
+.mini th,.mini td{border-bottom:1px solid var(--line);padding:6px 6px;text-align:left;vertical-align:top}
+.mini th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:500}
+.mini td.n{font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+.mini tr.ref td{background:var(--brand-soft)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:6px;font-size:13.5px}
+.steps li{display:flex;gap:8px;align-items:baseline}
+.steps b{font-family:var(--mono);font-weight:500;font-size:12px;min-width:18px}
+.done b{color:var(--ok-fg)} .todo b{color:var(--muted)}
+.tip{position:absolute;z-index:20;width:330px;max-width:calc(100vw - 32px);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;box-shadow:0 10px 28px rgba(0,0,0,.18);display:grid;gap:8px;font-size:13px}
+.tip h3{margin:0;font-family:var(--display);font-size:15px;line-height:1.2}
+.tip .cap{margin:0;font-size:12px;color:var(--muted)}
+.tip .rule{margin:0;font-size:12px;border-left:3px solid var(--brand);padding:2px 0 2px 8px;color:var(--ink)}
+.stack{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--nd-bg)}
+.stack i{display:block;height:100%}
+.sl{display:grid;gap:6px}
+.sl > div{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:start}
+.sl s{width:10px;height:10px;border-radius:3px;display:block;margin-top:4px}
+.sl b{font-family:var(--mono);font-weight:500;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl em{display:block;font-style:normal;font-size:11.5px;color:var(--muted)}
+.f-ok{background:var(--ok-fg)} .f-av{background:var(--av-fg)} .f-pr{background:var(--pr-fg)} .f-no{background:var(--no-fg)} .f-nd{background:var(--nd-fg)}
+.mun{padding:16px;display:grid;gap:14px}
+.mun-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:760px){.mun-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:480px){.hr{grid-template-columns:minmax(0,1fr) 56px}.hr .t{grid-column:1 / -1;grid-row:2}}
+.hb{display:grid;gap:9px}
+.hr{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) 56px;gap:10px;align-items:center;font-size:13px}
+.hr small{display:block;color:var(--muted);font-size:11.5px}
+.hr .t{height:12px;border-radius:3px;background:var(--nd-bg);overflow:hidden}
+.hr .t i{display:block;height:100%;border-radius:3px}
+.hr .c{font-family:var(--mono);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
+.glabel{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+details{border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+.crit{overflow-x:auto;margin-top:10px}
+.crit table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}
+.crit th,.crit td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+.crit th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;color:var(--muted);font-weight:500}
+.crit tr.ref td{background:var(--brand-soft)}
+.exp{padding:16px;display:grid;gap:12px}
+.exp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.chk{display:inline-flex;align-items:center;gap:7px;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;background:var(--surface)}
+.chk:has(input:checked){background:var(--brand-soft);border-color:var(--brand)}
+.chk input{accent-color:var(--brand);margin:0}
+.chk.all{border-style:dashed}
+.exp-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.prev{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.prev .tb{overflow-x:auto}
+.prev table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}
+.prev th,.prev td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.prev th{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--muted)}
+.rep{background:#ffffff;color:#15231e;border:1px solid var(--line);border-radius:8px;padding:20px;max-height:520px;overflow:auto;font-family:"Segoe UI",Arial,sans-serif;line-height:1.45}
+.rep h1{font-size:22px;margin:0 0 4px}.rep h2{font-size:17px;margin:22px 0 2px;color:#0f5c4a}
+.rep .m{color:#5a6b64;font-size:13px;margin:0 0 10px}.rep .aviso{background:#dde9f4;color:#1f5684;padding:8px 12px;border-radius:6px;font-size:13px}
+.rep table{border-collapse:collapse;width:100%;font-size:13px}.rep th,.rep td{border-bottom:1px solid #d8e1dc;padding:6px 8px;text-align:left;vertical-align:top;color:#15231e}
+.rep th{font-size:11px;text-transform:uppercase;color:#5a6b64}.rep .obs{font-size:13px;color:#5a6b64;background:#f3f6f4;padding:8px 10px;border-radius:6px}
+.rep footer{margin-top:20px;font-size:12px;color:#5a6b64;border-top:1px solid #d8e1dc;padding-top:8px}
+.prev-act{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button.primary{background:var(--brand);color:var(--surface);border-color:var(--brand);font-weight:600}
+button:disabled{opacity:.5;cursor:not-allowed}
+footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Monitoramento da universalização · URAE-1 · meta rural 2029</div>
+      <h1>Saneamento nos quilombos de Barra do Turvo</h1>
+      <p class="sub">Linha de base por comunidade · classificação PNSR · <span class="badge">dados oficiais 2022–2026 · vistoria pendente</span></p>
+    </div>
+    <div class="controls">
+      <label for="f-comp" class="sub">Mostrar</label>
+      <select id="f-comp">
+        <option value="all">Todas as comunidades</option>
+        <option value="gap">Só com déficit PNSR</option>
+        <option value="nd">Só com lacuna de dado</option>
+      </select>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis" aria-label="Indicadores-resumo"></section>
+
+  <div class="main">
+    <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
+      <div class="tablebox"><div class="grid" id="grid"></div></div>
+      <div class="legend">
+        <span><span class="pill ok">Adequado</span> atende o PNSR</span>
+        <span><span class="pill av">A confirmar</span> adequado se a vistoria ou o SISAGUA confirmar</span>
+        <span><span class="pill pr">Precário</span> solução existe, mas inadequada</span>
+        <span><span class="pill no">Sem atendimento</span> prática inadequada</span>
+        <span><span class="pill nd">Sem dado</span> lacuna</span>
+      </div>
+      <div class="legend" style="padding-top:0;border-top:0">Passe o mouse ou toque em uma célula para ver o tipo de atendimento de cada domicílio e a regra do PNSR aplicada. A pílula mostra a situação da maioria dos domicílios; a barra e o "déficit" mostram o resto.</div>
+    </section>
+    <aside class="panel detail" id="detail" aria-live="polite"></aside>
+  </div>
+
+  <section class="panel mun" aria-labelledby="mun-h">
+    <div><div class="eyebrow">Contexto do município</div><h2 id="mun-h">Barra do Turvo: o mesmo município, leituras diferentes</h2>
+    <p class="sub" style="margin-top:4px;max-width:70ch">Cobertura segundo cada fonte oficial. A diferença vem do que cada uma conta como atendimento, e nenhuma chega à escala da comunidade.</p></div>
+    <div class="mun-grid">
+      <div class="hb"><span class="glabel">Água · % da população</span><div id="hb-agua" class="hb"></div>
+        <span class="glabel" style="margin-top:6px">Esgoto · % da população</span><div id="hb-esg" class="hb"></div></div>
+      <div class="hb"><span class="glabel">Zona rural · SINISA 2024</span><div id="hb-rur" class="hb"></div>
+        <p class="sub" style="font-size:13px">Meta do contrato para a zona rural do município: 75% água e 66% esgoto em 2028; 99% e 90% de 2029 em diante, apuradas para a zona rural inteira, nunca por comunidade (URAE-1, 2024, Anexo II, p. 32-33).</p></div>
+    </div>
+    <details>
+      <summary>Cinco critérios oficiais para o mesmo domicílio</summary>
+      <div class="crit"><table>
+        <thead><tr><th>Critério</th><th>Água: o que conta como atendido</th><th>Esgoto: o que conta como atendido</th><th>Escala</th></tr></thead>
+        <tbody>
+          <tr><td><b>SINISA</b><br><small>Ministério das Cidades</small></td><td>Só a rede da prestadora</td><td>Só a rede da prestadora</td><td>Município</td></tr>
+          <tr><td><b>ODS 6</b><br><small>ANA, com o Censo 2022</small></td><td>Água canalizada dentro de casa, de qualquer fonte; não mede potabilidade</td><td>Rede com tratamento, mais fossa séptica com peso de 40%</td><td>Município</td></tr>
+          <tr><td><b>Contrato URAE-1</b><br><small>Sabesp, ARSESP</small></td><td>Rede ou solução alternativa admitida em norma</td><td>Rede ou fossa séptica admitida em norma</td><td>Zona rural do município</td></tr>
+          <tr><td><b>PMSB</b><br><small>Prefeitura, 2018</small></td><td>Rede ou solução alternativa</td><td>Rede ou fossa "adequada e em bom estado"</td><td>Município</td></tr>
+          <tr class="ref"><td><b>PNSR</b> · referência deste painel<br><small>Funasa, 2019, Quadro 4.1</small></td><td>Água potável, de rede ou de poço e nascente com canalização interna, sem intermitência prolongada</td><td>Rede seguida de tratamento, ou fossa séptica; fossa rudimentar é precária; vala, rio e céu aberto são sem atendimento</td><td>Domicílio e comunidade</td></tr>
+        </tbody>
+      </table></div>
+    </details>
+  </section>
+
+  <section class="panel exp" aria-labelledby="exp-h">
+    <div class="exp-head"><div><div class="eyebrow">Levar para reunião</div><h2 id="exp-h">Exportar dados</h2></div>
+      <label class="chk all"><input type="checkbox" id="ex-all" checked> Todas</label></div>
+    <div class="chips" id="ex-list"></div>
+    <div class="exp-actions">
+      <button id="ex-html" class="primary">Relatório para reunião (.html)</button>
+      <button id="ex-csv">Planilha (.csv)</button>
+      <button id="ex-copy">Copiar tabela</button>
+      <span id="ex-msg" class="sub" role="status"></span>
+    </div>
+    <div id="ex-prev" class="prev" hidden></div>
+    <p class="sub" style="margin:0">O relatório abre no navegador e pode ser impresso ou salvo em PDF. A planilha abre no Excel ou no Google Sheets. "Copiar tabela" cola direto no Word ou no Excel.</p>
+  </section>
+
+  <footer class="f">
+    <span>Fontes: IBGE, Censo Demográfico 2022, Quilombolas, Tabelas de resultado 12 e 13 (IBGE, 2024, p. 406, 422-423), domicílios com pelo menos um morador quilombola nos territórios oficialmente delimitados; ITESP (2026), famílias, área e reconhecimento; SINISA 2025, ano de referência 2024; ANA (2025), indicadores 6.1.1 e 6.2.1a; Contrato de Concessão 01/2024 da URAE-1; Funasa (2019), PNSR.</span>
+    <span>A classificação PNSR é provisória: o Censo não informa potabilidade nem confirma se a fossa declarada é de fato séptica. A vistoria de campo e o SISAGUA fecham essas lacunas. Nenhuma informação identifica moradores ou lotes.</span>
+    <span>Produto técnico-tecnológico · ProfÁgua UNESP/FEIS · protótipo para a qualificação.</span>
+  </footer>
+</div>
+
+<script>
+/* ---------- Dados ---------- */
+const L={ok:"Adequado",av:"A confirmar",pr:"Precário",no:"Sem atendimento",nd:"Sem dado"};
+const FILL={ok:"var(--ok-fg)",av:"var(--av-fg)",pr:"var(--pr-fg)",no:"var(--no-fg)",nd:"var(--nd-fg)"};
+const IND=["agua","esgoto","lixo","drenagem","sabesp"];
+const NOME={agua:"Abastecimento de água",esgoto:"Esgotamento sanitário",lixo:"Resíduos sólidos",drenagem:"Drenagem e águas pluviais",sabesp:"Levantamento rural Sabesp"};
+const CURTO={agua:"Água",esgoto:"Esgoto",lixo:"Resíduos",drenagem:"Drenagem",sabesp:"Lista Sabesp"};
+/* Regra do PNSR (Funasa, 2019, Quadro 4.1) aplicada a cada componente */
+const REGRA={
+ agua:"PNSR: adequado é água potável, da rede ou de poço e nascente com canalização interna, sem intermitência prolongada. O Censo não mede potabilidade e o SISAGUA não tem nenhuma amostra nas comunidades (a vigilância de 2026 só coletou na rede do Centro), por isso a água canalizada fica \"a confirmar\" até a vistoria.",
+ esgoto:"PNSR: adequado é rede seguida de tratamento ou fossa séptica; fossa rudimentar é precária; vala, rio ou céu aberto é sem atendimento. O Censo agrupa as duas últimas faixas, e a vistoria confirma se a fossa declarada é séptica.",
+ lixo:"PNSR: adequado é coleta direta ou indireta com destino final adequado; queimar, enterrar ou jogar no terreno é sem atendimento.",
+ drenagem:"PNSR: adequado é via com bueiro ou pavimentação e controle do escoamento no entorno da casa. O Censo não investiga isso nos territórios quilombolas.",
+ sabesp:"Não é critério do PNSR: indica se a comunidade entrou no levantamento rural que a Sabesp usa para cumprir a meta contratual."
+};
+/* ---------- Dados: lidos de dados/*.csv (separador ";", decimal com vírgula) ----------
+   Para atualizar o painel, edite os arquivos da pasta dados/ (veja o LEIA-ME).
+   As cópias abaixo só são usadas se os arquivos não puderem ser lidos (ex.: página aberta direto do computador). */
+const RESERVA={"comunidades": "id;nome;familias;area_ha;reconhecimento;dentro_rds;situacao_ibge;pessoas_quilombolas;domicilios;fonte;observacao\ncedro;Cedro;23;1066,11;2009-05-09;sim;Estudo técnico;59;25;Censo;\"Todos os 25 domicílios têm banheiro exclusivo e água canalizada dentro de casa, de poço, nascente ou mina; nenhum está ligado à rede geral. Oito usam fossa rudimentar ou pior.\"\nregi;Reginaldo;94;1279,68;2009-11-20;não;Estudo técnico;143;58;Censo;Única comunidade com domicílio ligado à rede geral (1 de 58) e com domicílios que dependem de carro-pipa, chuva ou rio (3). Mais da metade usa fossa rudimentar ou pior. Fica fora da RDS.\npppa;Pedra Preta/Paraíso;80;3280,26;2009-12-23;sim;Titulado;179;71;Censo;\"Maior território em população. Três de cada quatro domicílios declaram rede ou fossa séptica, mas 16 não têm coleta de lixo. O IBGE registra o território como titulado; o ITESP, não.\"\nrgts;Ribeirão Grande/Terra Seca;77;3471,04;2008-11-27;sim;Titulado;134;48;Censo;\"Pior situação de esgoto entre os territórios com dado: 28 de 48 domicílios (58%) usam fossa rudimentar ou pior. O IBGE registra o território como titulado; o ITESP, não.\"\nilhas;Ilhas;19;794,93;2025-08-04;não;;;;Vistoria;Reconhecida pelo ITESP em agosto de 2025, depois do Censo 2022. Não há dado oficial por domicílio: tudo virá da vistoria de campo.\n", "atendimento": "comunidade_id;componente;solucao;domicilios;classe_pnsr;observacao;fonte\ncedro;agua;Poço, nascente ou mina, canalizada dentro de casa;25;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\ncedro;esgoto;Rede geral ou fossa séptica (declarado ao Censo);17;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\ncedro;esgoto;Fossa rudimentar, vala, rio ou outra forma;8;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\ncedro;lixo;Coletado, direta ou indiretamente;21;adequado;;IBGE (2024), Censo 2022\ncedro;lixo;Queimado, enterrado ou outro destino na propriedade;4;sem atendimento;;IBGE (2024), Censo 2022\nregi;agua;Rede geral, canalizada dentro de casa;1;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nregi;agua;Poço, nascente ou mina, canalizada dentro de casa;54;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nregi;agua;Carro-pipa, água de chuva ou rio;3;precário;precário ou sem atendimento;IBGE (2024), Censo 2022\nregi;esgoto;Rede geral ou fossa séptica (declarado ao Censo);27;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\nregi;esgoto;Fossa rudimentar, vala, rio ou outra forma;31;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\nregi;lixo;Coletado, direta ou indiretamente;56;adequado;;IBGE (2024), Censo 2022\nregi;lixo;Queimado, enterrado ou outro destino na propriedade;2;sem atendimento;;IBGE (2024), Censo 2022\npppa;agua;Poço, nascente ou mina, canalizada dentro de casa;71;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\npppa;esgoto;Rede geral ou fossa séptica (declarado ao Censo);53;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\npppa;esgoto;Fossa rudimentar, vala, rio ou outra forma;18;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\npppa;lixo;Coletado, direta ou indiretamente;55;adequado;;IBGE (2024), Censo 2022\npppa;lixo;Queimado, enterrado ou outro destino na propriedade;16;sem atendimento;;IBGE (2024), Censo 2022\nrgts;agua;Poço, nascente ou mina, canalizada dentro de casa;48;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nrgts;esgoto;Rede geral ou fossa séptica (declarado ao Censo);20;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\nrgts;esgoto;Fossa rudimentar, vala, rio ou outra forma;28;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\nrgts;lixo;Coletado, direta ou indiretamente;38;adequado;;IBGE (2024), Censo 2022\nrgts;lixo;Queimado, enterrado ou outro destino na propriedade;10;sem atendimento;;IBGE (2024), Censo 2022\n", "municipio": "grupo;indicador;descricao;valor_pct;cor;fonte\nagua;SINISA;rede da prestadora;50,29;neutro;Brasil (2025a)\nagua;ODS 6.1.1 (ANA);canalizada, qualquer fonte;95,5;azul;ANA (2025)\nesgoto;IBGE, Censo 2022;rede geral ou pluvial;39,36;neutro;IBGE (2026)\nesgoto;SINISA;rede da prestadora;40,73;neutro;Brasil (2025a)\nesgoto;ODS 6.2.1a (ANA);rede + fossa séptica ajustada;48,9;verde;ANA (2025)\nrural;Água por rede;368 pessoas;9,66;azul;Brasil (2025a)\nrural;Esgoto por rede;nenhum morador rural;0;verde;Brasil (2025a)\nrural;Coleta de lixo;serviço da Prefeitura;75,79;neutro;Brasil (2025a)\n"};
+let data=[],B={},MUN={};
+function parseCSV(t){
+  t=t.replace(/^\ufeff/,"");const rows=[];let row=[],f="",q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+    else if(c==='"')q=true;else if(c===";"){row.push(f);f="";}
+    else if(c==="\n"){row.push(f.replace(/\r$/,""));rows.push(row);row=[];f="";}
+    else f+=c;}
+  if(f!==""||row.length){row.push(f.replace(/\r$/,""));rows.push(row);}
+  const h=rows.shift().map(x=>x.trim().toLowerCase());
+  return rows.filter(r=>r.some(x=>x.trim()!=="")).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]||"").trim()])));
+}
+const num=v=>{if(v==null||v==="")return null;const n=parseFloat(String(v).replace(/\./g,"").replace(",","."));return isNaN(n)?null:n;};
+const CLS={"adequado":"ok","a confirmar":"av","precario":"pr","precário":"pr","sem atendimento":"no","sem dado":"nd",ok:"ok",av:"av",pr:"pr",no:"no",nd:"nd"};
+const COR={azul:"var(--av-fg)",verde:"var(--brand)",neutro:"var(--nd-fg)"};
+const MESES=["jan.","fev.","mar.","abr.","mai.","jun.","jul.","ago.","set.","out.","nov.","dez."];
+const dataBR=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||"");return m?`${+m[3]} ${MESES[+m[2]-1]} ${m[1]}`:(s||"");};
+function montar(t){
+  data=parseCSV(t.comunidades).map(r=>({id:r.id,nome:r.nome,fam:num(r.familias),area:r.area_ha,rec:dataBR(r.reconhecimento),
+    rds:/^s/i.test(r.dentro_rds),ibge:r.situacao_ibge||null,pes:num(r.pessoas_quilombolas),dom:num(r.domicilios),fonte:r.fonte,obs:r.observacao}));
+  B={};data.forEach(d=>B[d.id]={});
+  parseCSV(t.atendimento).forEach(r=>{const b=B[r.comunidade_id];if(!b)return;const n=num(r.domicilios);if(n==null)return;
+    (b[r.componente]=b[r.componente]||[]).push([r.solucao,n,CLS[(r.classe_pnsr||"").toLowerCase()]||"nd",r.observacao||""]);});
+  MUN={};parseCSV(t.municipio).forEach(r=>(MUN[r.grupo]=MUN[r.grupo]||[]).push([r.indicador,r.descricao,num(r.valor_pct)||0,COR[(r.cor||"").toLowerCase()]||COR.neutro]));
+}
+const ESTADO={falhas:[],reserva:false,data:null};
+const DATA_RESERVA="12/11/2026";
+async function carregar(){
+  const t={};
+  await Promise.all(Object.keys(RESERVA).map(async n=>{
+    try{const r=await fetch("dados/"+n+".csv",{cache:"no-cache"});if(!r.ok)throw 0;t[n]=await r.text();
+      const lm=r.headers.get("Last-Modified");if(lm){const d=new Date(lm);if(!isNaN(d)&&(!ESTADO.data||d>ESTADO.data))ESTADO.data=d;}}
+    catch(e){t[n]=RESERVA[n];ESTADO.falhas.push(n+".csv");}
+  }));
+  try{montar(t);}catch(e){ESTADO.reserva=true;montar(RESERVA);}
+}
+function avisoDados(){
+  const box=document.createElement("p");box.className="sub";box.style.margin="0";box.setAttribute("role","status");
+  const lidos=!ESTADO.reserva&&ESTADO.falhas.length===0;
+  if(lidos){box.textContent="Dados atualizados em "+(ESTADO.data?ESTADO.data.toLocaleDateString("pt-BR"):DATA_RESERVA)+" · fonte: planilhas da pasta dados/";}
+  else{box.style.cssText="margin:0;padding:10px 12px;border-radius:8px;background:var(--pr-bg);color:var(--pr-fg);font-weight:600";
+    box.textContent=ESTADO.reserva?"Atenção: as planilhas da pasta dados/ têm erro de formato e não puderam ser usadas. O painel está exibindo a cópia interna de "+DATA_RESERVA+".":
+      "Atenção: não foi possível ler "+ESTADO.falhas.join(", ")+". Esses dados estão sendo exibidos a partir da cópia interna de "+DATA_RESERVA+".";}
+  const w=document.querySelector(".wrap");w.insertBefore(box,w.children[1]);
+}
+
+const NOTA={
+ agua:"O Censo agrupa rede, poço e nascente numa só categoria; o domicílio com acesso à rede geral foi separado a partir da coluna de acesso à rede.",
+ esgoto:"Todos os domicílios com dado têm banheiro de uso exclusivo."
+};
+const PEND={
+ agua:"Comunidade reconhecida depois do Censo 2022. Próximo passo: vistoria de campo.",
+ esgoto:"Comunidade reconhecida depois do Censo 2022. Próximo passo: vistoria de campo.",
+ lixo:"Comunidade reconhecida depois do Censo 2022. Próximo passo: vistoria de campo.",
+ drenagem:"O Censo 2022 não investiga drenagem nos territórios quilombolas. Próximo passo: vistoria de campo.",
+ sabesp:"Aguardando consulta à URAE-1 e à ARSESP via Lei de Acesso à Informação."
+};
+
+function iniciar(){
+/* ---------- Cálculos ---------- */
+const sum=a=>a.reduce((s,p)=>s+p[1],0);
+function resumo(id,f){
+  const parts=B[id]&&B[id][f];
+  if(!parts) return {cls:"nd",def:null,parts:null};
+  const tot=sum(parts),by={};
+  parts.forEach(p=>by[p[2]]=(by[p[2]]||0)+p[1]);
+  const cls=Object.keys(by).sort((a,b)=>by[b]-by[a])[0];
+  const def=((by.pr||0)+(by.no||0))/tot*100;
+  return {cls,def,parts,tot,by};
+}
+const pct=(v,d=0)=>v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})+"%";
+const pill=k=>`<span class="pill ${k}">${L[k]}</span>`;
+const stackBar=(parts,tot,cls="bar")=>`<div class="${cls}" aria-hidden="true">${parts.map(p=>`<i style="width:${p[1]/tot*100}%;background:${FILL[p[2]]}"></i>`).join("")}</div>`;
+let sel="regi";
+try{const s=localStorage.getItem("sq-sel");if(s&&data.some(d=>d.id===s))sel=s;}catch(e){}
+
+function kpis(){
+  const com=data.filter(d=>d.dom);
+  const dom=com.reduce((s,d)=>s+d.dom,0);
+  const tot=(f,k)=>com.reduce((s,d)=>s+B[d.id][f].filter(p=>k.includes(p[2])).reduce((a,p)=>a+p[1],0),0);
+  const esgDef=tot("esgoto",["pr","no"]),esgAv=tot("esgoto",["av"]);
+  const lixNo=tot("lixo",["no"]),agAv=tot("agua",["av"]),agDef=tot("agua",["pr","no"]);
+  const fam=data.reduce((s,d)=>s+d.fam,0);
+  const seg=(a)=>`<div class="bar" aria-hidden="true">${a.map(([v,c])=>`<i style="width:${v/dom*100}%;background:${FILL[c]}"></i>`).join("")}</div>`;
+  const box=(l,v,bar,note)=>`<div class="kpi"><span class="l">${l}</span><span class="v">${v}</span>${bar||""}<span class="n">${note}</span></div>`;
+  document.getElementById("kpis").innerHTML=
+    box("Comunidades reconhecidas",data.length,null,`${fam} famílias (ITESP) · ${com.length} com dado censitário`)+
+    box("Domicílios quilombolas nos territórios",dom,null,"Censo 2022 · Ilhas não incluída")+
+    box("Esgoto em déficit PNSR",pct(esgDef/dom*100),seg([[esgAv,"av"],[esgDef,"pr"]]),`${esgDef} domicílios com fossa rudimentar ou pior`)+
+    box("Água a confirmar (potabilidade)",pct(agAv/dom*100),seg([[agAv,"av"],[agDef,"pr"]]),`${agDef} domicílios dependem de carro-pipa, chuva ou rio`)+
+    box("Lixo sem coleta",pct(lixNo/dom*100),seg([[dom-lixNo,"ok"],[lixNo,"no"]]),`${lixNo} domicílios queimam ou enterram`);
+}
+
+function grid(){
+  const f=document.getElementById("f-comp").value;
+  const rows=data.filter(d=>{
+    if(f==="all") return true;
+    const r=IND.map(k=>resumo(d.id,k));
+    return f==="gap"? r.some(x=>x.def>0) : r.some(x=>x.cls==="nd");
+  });
+  document.getElementById("grid").innerHTML=
+   `<div class="row hd"><span>Comunidade</span>${IND.map(k=>`<span>${CURTO[k]}</span>`).join("")}<span>Dado</span></div>`+
+   (rows.length?rows.map(d=>`<div class="row${d.id===sel?" sel":""}" tabindex="0" role="button" data-id="${d.id}" aria-label="Ver ficha de ${d.nome}">
+     <span class="name">${d.nome}<small>${d.dom?d.dom+" domicílios · "+d.pes+" pessoas":"sem dado censitário"}</small></span>${IND.map(k=>{
+       const r=resumo(d.id,k);
+       const extra=r.parts?`${stackBar(r.parts,r.tot)}<span class="df">${r.def>0?"déficit "+pct(r.def):"sem déficit declarado"}</span>`:"";
+       return `<span class="cell" tabindex="0" data-c="${d.id}" data-f="${k}">${pill(r.cls)}${extra}</span>`;}).join("")}
+     <span class="src">${d.fonte}</span></div>`).join(""):`<div class="row hd"><span>Nenhuma comunidade neste filtro.</span></div>`);
+}
+
+function detail(){
+  const d=data.find(x=>x.id===sel);
+  const chips=`<div class="chips">${d.rds?'<span class="chip rds">Dentro da RDS Quilombos</span>':'<span class="chip">Fora da RDS</span>'}${d.ibge?`<span class="chip">IBGE: ${d.ibge}</span>`:'<span class="chip">Sem dado no Censo 2022</span>'}${d.ibge==="Titulado"?'<span class="chip warn">ITESP não registra titulação</span>':""}</div>`;
+  let leit="";
+  if(d.dom){
+    const e=B[d.id].esgoto,ok=e.filter(p=>p[2]==="av").reduce((s,p)=>s+p[1],0),rud=d.dom-ok,okp=ok/d.dom*100;
+    const rede=(B[d.id].agua.find(p=>p[0].startsWith("Rede"))||[0,0])[1];
+    const canal=B[d.id].agua.filter(p=>p[2]==="av").reduce((s,p)=>s+p[1],0);
+    const rows=[
+      ["SINISA",pct(rede/d.dom*100,1),"0%"],
+      ["ODS 6 (ANA)",pct(d.dom?100:0),"≈ "+pct(okp*0.4,1)],
+      ["Contrato URAE-1","até "+pct(canal/d.dom*100),"até "+pct(okp)],
+      ["PMSB","até "+pct(canal/d.dom*100),"até "+pct(okp)+", se em bom estado"],
+      ["PNSR","a confirmar "+pct(canal/d.dom*100),`a confirmar ${pct(okp)}; déficit ${pct(rud/d.dom*100)}`]
+    ];
+    leit=`<div><div class="eyebrow" style="margin-bottom:6px">Os mesmos ${d.dom} domicílios em cinco leituras</div>
+      <div style="overflow-x:auto"><table class="mini"><thead><tr><th>Critério</th><th>Água atendida</th><th>Esgoto atendido</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr${r[0]==="PNSR"?' class="ref"':""}><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td></tr>`).join("")}</tbody></table></div></div>`;
+  }
+  const st=[["Dados do Censo 2022 por território compilados",!!d.dom],["Famílias e área conferidas com o ITESP",true],["Metas e critérios do contrato analisados",true],["Consulta à URAE-1 e à ARSESP (LAI)",false],["Validação da área pela Prefeitura",false],["Vistoria de campo com a comunidade",false],["Consulta ao SISAGUA: sem amostras na comunidade",true],["Inspeção sanitária das fontes de água",false]];
+  document.getElementById("detail").innerHTML=`
+   <div><div class="eyebrow">Ficha da comunidade</div><h2>${d.nome}</h2></div>
+   ${chips}
+   <div class="kv">
+     ${IND.slice(0,4).map(k=>`<div><span>${NOME[k]}</span>${pill(resumo(d.id,k).cls)}</div>`).join("")}
+     <div><span>Famílias (ITESP)</span><span class="num">${d.fam}</span></div>
+     <div><span>Área</span><span class="num">${d.area} ha</span></div>
+     <div><span>Reconhecimento</span><span class="num">${d.rec}</span></div>
+     ${d.dom?`<div><span>Pessoas quilombolas · domicílios</span><span class="num">${d.pes} · ${d.dom}</span></div>`:""}
+   </div>
+   <p class="note">${d.obs}</p>
+   ${leit}
+   <div><div class="eyebrow" style="margin-bottom:6px">Etapas do protocolo</div>
+   <ul class="steps">${st.map(([t,ok])=>`<li class="${ok?"done":"todo"}"><b>${ok?"✓":"○"}</b>${t}</li>`).join("")}</ul></div>`;
+}
+
+function hbars(id,list){
+  document.getElementById(id).innerHTML=list.map(([n,s,v,c])=>`<div class="hr"><span>${n}<small>${s}</small></span><div class="t" role="img" aria-label="${n}: ${pct(v,1)}"><i style="width:${v}%;background:${c}"></i></div><span class="c">${pct(v,1)}</span></div>`).join("");
+}
+
+/* ---------- Tooltip ---------- */
+const tip=document.createElement("div");tip.className="tip";tip.setAttribute("role","tooltip");tip.hidden=true;document.body.appendChild(tip);
+let pinned=null;
+function tipHTML(cid,f){
+  const d=data.find(x=>x.id===cid),r=resumo(cid,f);
+  const head=`<h3>${NOME[f]} · ${d.nome}</h3><p class="cap">Situação predominante: ${L[r.cls]}${d.dom&&r.parts?` · ${d.dom} domicílios`:""}</p>`;
+  const rule=`<p class="rule">${REGRA[f]}</p>`;
+  if(!r.parts) return head+`<p class="cap">${PEND[f]}</p>`+rule;
+  return head+stackBar(r.parts,r.tot,"stack")+
+   `<div class="sl">${r.parts.map(p=>`<div><s style="background:${FILL[p[2]]}"></s><span>${p[0]}<em>${L[p[2]]}${p[3]?" · "+p[3]:""}</em></span><b>${p[1]} · ${pct(p[1]/r.tot*100)}</b></div>`).join("")}</div>`+
+   (NOTA[f]?`<p class="cap">${NOTA[f]}</p>`:"")+rule+
+   `<p class="cap">Fonte: IBGE (2024), Censo 2022, domicílios com pelo menos um morador quilombola.</p>`;
+}
+function showTip(el){
+  tip.innerHTML=tipHTML(el.dataset.c,el.dataset.f);tip.hidden=false;
+  const r=el.getBoundingClientRect(),w=tip.offsetWidth,vw=document.documentElement.clientWidth;
+  let left=r.left+window.scrollX+r.width/2-w/2;left=Math.max(window.scrollX+16,Math.min(left,window.scrollX+vw-w-16));
+  let top=r.bottom+window.scrollY+8;
+  if(r.bottom+tip.offsetHeight+12>window.innerHeight&&r.top>tip.offsetHeight+12) top=r.top+window.scrollY-tip.offsetHeight-8;
+  tip.style.left=left+"px";tip.style.top=top+"px";
+}
+function hideTip(){if(!pinned)tip.hidden=true;}
+const gridEl=document.getElementById("grid");
+gridEl.addEventListener("mouseover",e=>{const c=e.target.closest(".cell");if(c&&!pinned)showTip(c);});
+gridEl.addEventListener("mouseout",e=>{const c=e.target.closest(".cell");if(c&&!c.contains(e.relatedTarget))hideTip();});
+gridEl.addEventListener("focusin",e=>{const c=e.target.closest(".cell");if(c&&!pinned)showTip(c);});
+gridEl.addEventListener("focusout",e=>{if(e.target.closest(".cell"))hideTip();});
+gridEl.addEventListener("click",e=>{
+  const c=e.target.closest(".cell");
+  if(c){const k=c.dataset.c+c.dataset.f;if(pinned===k){pinned=null;tip.hidden=true;}else{pinned=null;showTip(c);pinned=k;}}
+  const r=e.target.closest(".row[data-id]");if(r)choose(r.dataset.id);
+});
+gridEl.addEventListener("keydown",e=>{const r=e.target.closest(".row[data-id]");if(r&&e.target===r&&(e.key==="Enter"||e.key===" ")){e.preventDefault();choose(r.dataset.id);}});
+function choose(id){if(sel===id)return;sel=id;try{localStorage.setItem("sq-sel",id);}catch(e){}document.querySelectorAll(".row.sel").forEach(x=>x.classList.remove("sel"));const r=document.querySelector(`.row[data-id="${id}"]`);if(r)r.classList.add("sel");detail();}
+document.addEventListener("click",e=>{if(!e.target.closest(".cell")&&!e.target.closest(".tip")){pinned=null;tip.hidden=true;}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){pinned=null;tip.hidden=true;}});
+window.addEventListener("scroll",()=>{if(!pinned)tip.hidden=true;},{passive:true});
+document.getElementById("f-comp").addEventListener("change",grid);
+
+/* ---------- Exportação ---------- */
+const exList=document.getElementById("ex-list"),exAll=document.getElementById("ex-all"),exMsg=document.getElementById("ex-msg");
+exList.innerHTML=data.map(d=>`<label class="chk"><input type="checkbox" value="${d.id}" checked> ${d.nome}</label>`).join("");
+const boxes=[...exList.querySelectorAll("input")];
+const chosen=()=>data.filter(d=>boxes.find(b=>b.value===d.id).checked);
+function syncEx(){const n=chosen().length;exAll.checked=n===data.length;exAll.indeterminate=n>0&&n<data.length;["ex-html","ex-csv","ex-copy"].forEach(id=>document.getElementById(id).disabled=n===0);exMsg.textContent=n?`${n} de ${data.length} comunidades selecionadas`:"Selecione ao menos uma comunidade";}
+boxes.forEach(b=>b.addEventListener("change",syncEx));
+exAll.addEventListener("change",()=>{boxes.forEach(b=>b.checked=exAll.checked);syncEx();});
+syncEx();
+const hoje=()=>new Date().toLocaleDateString("pt-BR");
+const stamp=()=>new Date().toISOString().slice(0,10);
+const fonteTxt=d=>d.dom?"IBGE (2024), Censo 2022":"Vistoria de campo (pendente)";
+const CAB=["Comunidade","Componente","Classificação PNSR predominante","Solução ou situação","Classe PNSR da solução","Domicílios","Percentual","Fonte"];
+function linhas(list){
+  const out=[];
+  list.forEach(d=>IND.forEach(f=>{
+    const r=resumo(d.id,f);
+    if(!r.parts){out.push([d.nome,NOME[f],L[r.cls],PEND[f],"","","",f==="sabesp"?"URAE-1/ARSESP (pendente)":fonteTxt(d)]);return;}
+    r.parts.forEach(p=>out.push([d.nome,NOME[f],L[r.cls],p[0],L[p[2]],p[1],pct(p[1]/r.tot*100),fonteTxt(d)]));
+  }));
+  return out;
+}
+function csv(list){
+  const q=v=>{v=String(v);return /[;"\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v;};
+  return "﻿"+[["Saneamento nos quilombos de Barra do Turvo, exportado em "+hoje()+"; classificação PNSR provisória"],CAB,...linhas(list)].map(r=>r.map(q).join(";")).join("\r\n");
+}
+const COR={ok:"#1d5e2c;background:#dcefdf",av:"#1f5684;background:#dde9f4",pr:"#7a4d06;background:#f8e7c4",no:"#8a231b;background:#f6d9d6",nd:"#6c7470;background:#eceeed"};
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function relatorio(list){
+  const tag=k=>`<span style="color:${COR[k]};padding:2px 7px;border-radius:5px;font-weight:600;font-size:12px">${L[k]}</span>`;
+  const fichas=list.map(d=>{
+    const rows=IND.map(f=>{const r=resumo(d.id,f);const det=r.parts?r.parts.map(p=>`${esc(p[0])}: ${p[1]} (${L[p[2]]})`).join("<br>"):`<em>${esc(PEND[f])}</em>`;return `<tr><td>${NOME[f]}</td><td>${tag(r.cls)}</td><td>${det}</td></tr>`;}).join("");
+    return `<section><h2>${esc(d.nome)}</h2><p class="m">Barra do Turvo/SP · ${d.fam} famílias (ITESP) · ${d.dom?d.dom+" domicílios quilombolas (Censo 2022)":"domicílios a levantar na vistoria"} · ${d.rds?"dentro":"fora"} da RDS</p><table><thead><tr><th>Componente</th><th>PNSR</th><th>Detalhe por domicílio</th></tr></thead><tbody>${rows}</tbody></table><p class="obs">${esc(d.obs)}</p></section>`;
+  }).join("");
+  const res=list.map(d=>`<tr><td>${esc(d.nome)}</td>${IND.map(f=>`<td>${tag(resumo(d.id,f).cls)}</td>`).join("")}</tr>`).join("");
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Saneamento nos quilombos de Barra do Turvo, ${hoje()}</title><style>body{font-family:"Segoe UI",Arial,sans-serif;color:#15231e;max-width:900px;margin:32px auto;padding:0 20px;line-height:1.45}h1{font-size:24px;margin:0 0 4px}h2{font-size:18px;margin:28px 0 2px;color:#0f5c4a}.m{color:#5a6b64;font-size:13px;margin:0 0 10px}.aviso{background:#dde9f4;color:#1f5684;padding:8px 12px;border-radius:6px;font-size:13px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #d8e1dc;padding:7px 8px;text-align:left;vertical-align:top}th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5a6b64}.obs{font-size:13px;color:#5a6b64;background:#f3f6f4;padding:8px 10px;border-radius:6px}section{page-break-inside:avoid}footer{margin-top:32px;font-size:12px;color:#5a6b64;border-top:1px solid #d8e1dc;padding-top:10px}</style></head><body><h1>Saneamento nos quilombos de Barra do Turvo</h1><p class="m">Acompanhamento da universalização (URAE-1, meta rural 2029) · classificação PNSR · gerado em ${hoje()}</p><p class="aviso">Classificação provisória: o Censo não informa potabilidade nem confirma se a fossa declarada é séptica. A vistoria de campo e o SISAGUA fecham essas lacunas.</p><h2>Resumo</h2><table><thead><tr><th>Comunidade</th>${IND.map(f=>`<th>${CURTO[f]}</th>`).join("")}</tr></thead><tbody>${res}</tbody></table>${fichas}<footer>Produto técnico-tecnológico · ProfÁgua UNESP/FEIS · Fontes: IBGE (2024), Censo 2022, Quilombolas; ITESP (2026); Funasa (2019), PNSR, Quadro 4.1.</footer></body></html>`;
+}
+let dlPromise=null;
+function getDownloads(){
+  if(!dlPromise){
+    dlPromise=new Promise(res=>{let t=0;const tick=()=>{if(window.claude&&typeof window.claude.use==="function"){window.claude.use("downloads").then(res,()=>res(null));return;}if(++t>40){res(null);return;}setTimeout(tick,100);};tick();}).then(x=>{if(!x)dlPromise=null;return x;});
+  }
+  return dlPromise;
+}
+getDownloads();
+const prev=document.getElementById("ex-prev");
+function copiarRico(html,txt,okMsg,alvo){
+  const manual=()=>{const s=window.getSelection(),r=document.createRange();r.selectNodeContents(alvo);s.removeAllRanges();s.addRange(r);let d=false;try{d=document.execCommand("copy");}catch(e){}exMsg.textContent=d?okMsg:"O conteúdo está selecionado. Use Ctrl+C para copiar.";};
+  try{
+    if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+      navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([txt],{type:"text/plain"})})]).then(()=>exMsg.textContent=okMsg,manual);
+    }else manual();
+  }catch(e){manual();}
+}
+function mostrarConteudo(nome,conteudo,motivo){
+  prev.hidden=false;
+  const list=chosen();
+  if(nome.endsWith(".html")){
+    const corpo=conteudo.replace(/^[\s\S]*<body>/,"").replace(/<\/body>[\s\S]*$/,"");
+    prev.innerHTML=`<p class="sub" style="margin:0">${motivo} Abaixo está o relatório pronto. Clique em "Copiar relatório" e cole no Word ou no Google Docs.</p><div class="prev-act"><button id="cp-rep" class="primary">Copiar relatório</button></div><div class="rep" id="rep">${corpo}</div>`;
+    const rep=document.getElementById("rep");
+    document.getElementById("cp-rep").addEventListener("click",()=>copiarRico(conteudo,rep.innerText,"Relatório copiado. Cole no Word ou no Google Docs.",rep));
+  }else{
+    const ls=linhas(list),rows=[CAB,...ls];
+    const html=`<table><thead><tr>${CAB.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${ls.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    const txt=rows.map(r=>r.map(c=>String(c).replace(/[\t\n]/g," ")).join("\t")).join("\n");
+    prev.innerHTML=`<p class="sub" style="margin:0">${motivo} Abaixo estão os dados (${ls.length} linhas). Clique em "Copiar para planilha" e cole na célula A1.</p><div class="prev-act"><button id="cp-csv" class="primary">Copiar para planilha</button></div><div class="tb">${html}</div>`;
+    document.getElementById("cp-csv").addEventListener("click",()=>copiarRico(html,txt,`${ls.length} linhas copiadas.`,prev.querySelector("table")));
+  }
+  prev.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+async function salvar(nome,conteudo){
+  exMsg.textContent="Preparando o arquivo…";
+  const dl=await getDownloads();
+  if(!dl){exMsg.textContent="";mostrarConteudo(nome,conteudo,"O download direto não está disponível nesta visualização.");return;}
+  try{
+    await dl.save({filename:nome,data:new Blob([conteudo],{type:nome.endsWith(".csv")?"text/csv":"text/html"})});
+    exMsg.textContent=`Arquivo ${nome} salvo.`;prev.hidden=true;
+  }catch(e){
+    const c=e&&e.code;
+    if(c==="declined"){exMsg.textContent="Download cancelado.";return;}
+    if(c==="rate_limited"){exMsg.textContent="Já há um download aguardando confirmação.";return;}
+    exMsg.textContent="";mostrarConteudo(nome,conteudo,`Não foi possível salvar o arquivo (${c||"erro desconhecido"}).`);
+  }
+}
+const sufixo=l=>l.length===1?l[0].id:l.length===data.length?"todas":l.length+"-comunidades";
+document.getElementById("ex-html").addEventListener("click",()=>{const l=chosen();salvar(`saneamento-quilombos-barra-do-turvo_${sufixo(l)}_${stamp()}.html`,relatorio(l));});
+document.getElementById("ex-csv").addEventListener("click",()=>{const l=chosen();salvar(`saneamento-quilombos-barra-do-turvo_${sufixo(l)}_${stamp()}.csv`,csv(l));});
+const RCAB=["Comunidade",...IND.map(f=>CURTO[f]+" (PNSR)"),"Famílias","Domicílios","Fonte"];
+const resumoRows=l=>l.map(d=>[d.nome,...IND.map(f=>{const r=resumo(d.id,f);return L[r.cls]+(r.def>0?` (déficit ${pct(r.def)})`:"");}),d.fam,d.dom||"a levantar",fonteTxt(d)]);
+document.getElementById("ex-copy").addEventListener("click",()=>{
+  const l=chosen(),rows=[RCAB,...resumoRows(l)];
+  const txt=rows.map(r=>r.map(c=>String(c).replace(/[\t\n]/g," ")).join("\t")).join("\n");
+  const html=`<table><thead><tr>${RCAB.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${resumoRows(l).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  prev.hidden=false;
+  prev.innerHTML=`<p class="sub" style="margin:0">Tabela-resumo: ${l.length} comunidade${l.length>1?"s":""}.</p><div class="tb">${html}</div>`;
+  copiarRico(html,txt,`Tabela com ${l.length} comunidade${l.length>1?"s":""} copiada. Cole no Word ou no Excel.`,prev.querySelector("table"));
+});
+
+hbars("hb-agua",MUN.agua);hbars("hb-esg",MUN.esgoto);hbars("hb-rur",MUN.rural);
+kpis();grid();detail();
+}
+carregar().then(()=>{iniciar();avisoDados();});
+</script>
+
+</body>
+</html>

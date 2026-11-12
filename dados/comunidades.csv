@@ -1,0 +1,6 @@
+﻿id;nome;familias;area_ha;reconhecimento;dentro_rds;situacao_ibge;pessoas_quilombolas;domicilios;fonte;observacao
+cedro;Cedro;23;1066,11;2009-05-09;sim;Estudo técnico;59;25;Censo;"Todos os 25 domicílios têm banheiro exclusivo e água canalizada dentro de casa, de poço, nascente ou mina; nenhum está ligado à rede geral. Oito usam fossa rudimentar ou pior."
+regi;Reginaldo;94;1279,68;2009-11-20;não;Estudo técnico;143;58;Censo;Única comunidade com domicílio ligado à rede geral (1 de 58) e com domicílios que dependem de carro-pipa, chuva ou rio (3). Mais da metade usa fossa rudimentar ou pior. Fica fora da RDS.
+pppa;Pedra Preta/Paraíso;80;3280,26;2009-12-23;sim;Titulado;179;71;Censo;"Maior território em população. Três de cada quatro domicílios declaram rede ou fossa séptica, mas 16 não têm coleta de lixo. O IBGE registra o território como titulado; o ITESP, não."
+rgts;Ribeirão Grande/Terra Seca;77;3471,04;2008-11-27;sim;Titulado;134;48;Censo;"Pior situação de esgoto entre os territórios com dado: 28 de 48 domicílios (58%) usam fossa rudimentar ou pior. O IBGE registra o território como titulado; o ITESP, não."
+ilhas;Ilhas;19;794,93;2025-08-04;não;;;;Vistoria;Reconhecida pelo ITESP em agosto de 2025, depois do Censo 2022. Não há dado oficial por domicílio: tudo virá da vistoria de campo.
