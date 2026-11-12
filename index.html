@@ -28,6 +28,7 @@
   --brand:#5fc3a4; --brand-soft:#1c3029;
   --ok-bg:#1d3a25; --ok-fg:#9fdcaf; --av-bg:#1b2f42; --av-fg:#9cc8ee; --pr-bg:#3d2e12; --pr-fg:#f2c77a; --no-bg:#43201d; --no-fg:#f3a9a1; --nd-bg:#242d2a; --nd-fg:#98a39e; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
 .wrap{max-width:1160px;margin:0 auto;display:grid;gap:18px}
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
@@ -437,12 +438,14 @@ function showTip(el){
 function hideTip(){if(!pinned)tip.hidden=true;}
 const gridEl=document.getElementById("grid");
 gridEl.addEventListener("mouseover",e=>{const c=e.target.closest(".cell");if(c&&!pinned)showTip(c);});
-gridEl.addEventListener("mouseout",e=>{const c=e.target.closest(".cell");if(c&&!c.contains(e.relatedTarget))hideTip();});
+const PODE_HOVER=(()=>{try{return matchMedia("(hover: hover) and (pointer: fine)").matches;}catch(e){return true;}})();
+gridEl.addEventListener("mouseout",e=>{const c=e.target.closest(".cell");if(c&&!c.contains(e.relatedTarget)){pinned=null;tip.hidden=true;}});
+gridEl.addEventListener("mouseleave",()=>{pinned=null;tip.hidden=true;});
 gridEl.addEventListener("focusin",e=>{const c=e.target.closest(".cell");if(c&&!pinned)showTip(c);});
 gridEl.addEventListener("focusout",e=>{if(e.target.closest(".cell"))hideTip();});
 gridEl.addEventListener("click",e=>{
   const c=e.target.closest(".cell");
-  if(c){const k=c.dataset.c+c.dataset.f;if(pinned===k){pinned=null;tip.hidden=true;}else{pinned=null;showTip(c);pinned=k;}}
+  if(c&&!PODE_HOVER){const k=c.dataset.c+c.dataset.f;if(pinned===k){pinned=null;tip.hidden=true;}else{pinned=null;showTip(c);pinned=k;}}
   const r=e.target.closest(".row[data-id]");if(r)choose(r.dataset.id);
 });
 gridEl.addEventListener("keydown",e=>{const r=e.target.closest(".row[data-id]");if(r&&e.target===r&&(e.key==="Enter"||e.key===" ")){e.preventDefault();choose(r.dataset.id);}});
