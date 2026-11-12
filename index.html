@@ -102,6 +102,24 @@ button:focus-visible,select:focus-visible,.row:focus-visible,summary:focus-visib
 .mun-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
 @media (max-width:760px){.mun-grid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:480px){.hr{grid-template-columns:minmax(0,1fr) 56px}.hr .t{grid-column:1 / -1;grid-row:2}}
+.pop{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;background:var(--bg);border-radius:8px;padding:10px 12px}
+.pop b{font-family:var(--mono);font-weight:500}
+.mun > *{min-width:0}
+.mt{overflow-x:auto}
+.mt table{border-collapse:collapse;width:100%;min-width:720px;font-size:13.5px}
+.mt th,.mt td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.mt thead th{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:500}
+.mt thead th.v{width:15%}
+.mt tr.grp td{background:var(--brand-soft);font-weight:600;color:var(--brand);font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px}
+.mt .f b{display:block}
+.mt .f small{display:block;color:var(--muted);font-size:12px}
+.mt .crit{font-size:13px}
+.mt .val{display:grid;gap:4px}
+.mt .val span{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.mt .val i{display:block;height:6px;border-radius:3px;background:var(--nd-bg);overflow:hidden}
+.mt .val i u{display:block;height:100%;background:var(--muted);text-decoration:none}
+.mt .val small{color:var(--muted);font-size:11.5px}
+.mt .na{color:var(--muted);font-size:12px}
 .hb{display:grid;gap:9px}
 .hr{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr) 56px;gap:10px;align-items:center;font-size:13px}
 .hr small{display:block;color:var(--muted);font-size:11.5px}
@@ -176,14 +194,11 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
   </div>
 
   <section class="panel mun" aria-labelledby="mun-h">
-    <div><div class="eyebrow">Contexto do município</div><h2 id="mun-h">Barra do Turvo: o mesmo município, leituras diferentes</h2>
-    <p class="sub" style="margin-top:4px;max-width:70ch">Cobertura segundo cada fonte oficial. A diferença vem do que cada uma conta como atendimento, e nenhuma chega à escala da comunidade.</p></div>
-    <div class="mun-grid">
-      <div class="hb"><span class="glabel">Água · % da população</span><div id="hb-agua" class="hb"></div>
-        <span class="glabel" style="margin-top:6px">Esgoto · % da população</span><div id="hb-esg" class="hb"></div></div>
-      <div class="hb"><span class="glabel">Zona rural · SINISA 2024</span><div id="hb-rur" class="hb"></div>
-        <p class="sub" style="font-size:13px">Meta do contrato para a zona rural do município: 75% água e 66% esgoto em 2028; 99% e 90% de 2029 em diante, apuradas para a zona rural inteira, nunca por comunidade (URAE-1, 2024, Anexo II, p. 32-33).</p></div>
-    </div>
+    <div><div class="eyebrow">Contexto do município</div><h2 id="mun-h">O que os dados oficiais dizem sobre Barra do Turvo</h2>
+    <p class="sub" style="margin-top:4px;max-width:75ch">Antes de olhar as comunidades, o retrato do município. Cada fonte oficial conta "atendimento" de um jeito, e por isso os números não batem. Nenhuma delas separa as comunidades quilombolas: todas ficam dentro da coluna "zona rural".</p></div>
+    <div class="pop" id="mun-pop"></div>
+    <div id="mun-tab"></div>
+    <p class="sub" style="font-size:13px;margin:0;max-width:80ch"><b>Meta do contrato da Sabesp para a zona rural de Barra do Turvo:</b> 75% em água e 66% em esgoto em 2028; 99% e 90% de 2029 em diante. A meta é apurada para a zona rural inteira, nunca por comunidade, e conta poços e fossas sépticas admitidos em norma, que o SINISA não mede (URAE-1, 2024, Anexo II, p. 32-33).</p>
     <details>
       <summary>Cinco critérios oficiais para o mesmo domicílio</summary>
       <div class="crit"><table>
@@ -238,7 +253,7 @@ const REGRA={
 /* ---------- Dados: lidos de dados/*.csv (separador ";", decimal com vírgula) ----------
    Para atualizar o painel, edite os arquivos da pasta dados/ (veja o LEIA-ME).
    As cópias abaixo só são usadas se os arquivos não puderem ser lidos (ex.: página aberta direto do computador). */
-const RESERVA={"comunidades": "id;nome;familias;area_ha;reconhecimento;dentro_rds;situacao_ibge;pessoas_quilombolas;domicilios;fonte;observacao\ncedro;Cedro;23;1066,11;2009-05-09;sim;Estudo técnico;59;25;Censo;\"Todos os 25 domicílios têm banheiro exclusivo e água canalizada dentro de casa, de poço, nascente ou mina; nenhum está ligado à rede geral. Oito usam fossa rudimentar ou pior.\"\nregi;Reginaldo;94;1279,68;2009-11-20;não;Estudo técnico;143;58;Censo;Única comunidade com domicílio ligado à rede geral (1 de 58) e com domicílios que dependem de carro-pipa, chuva ou rio (3). Mais da metade usa fossa rudimentar ou pior. Fica fora da RDS.\npppa;Pedra Preta/Paraíso;80;3280,26;2009-12-23;sim;Titulado;179;71;Censo;\"Maior território em população. Três de cada quatro domicílios declaram rede ou fossa séptica, mas 16 não têm coleta de lixo. O IBGE registra o território como titulado; o ITESP, não.\"\nrgts;Ribeirão Grande/Terra Seca;77;3471,04;2008-11-27;sim;Titulado;134;48;Censo;\"Pior situação de esgoto entre os territórios com dado: 28 de 48 domicílios (58%) usam fossa rudimentar ou pior. O IBGE registra o território como titulado; o ITESP, não.\"\nilhas;Ilhas;19;794,93;2025-08-04;não;;;;Vistoria;Reconhecida pelo ITESP em agosto de 2025, depois do Censo 2022. Não há dado oficial por domicílio: tudo virá da vistoria de campo.\n", "atendimento": "comunidade_id;componente;solucao;domicilios;classe_pnsr;observacao;fonte\ncedro;agua;Poço, nascente ou mina, canalizada dentro de casa;25;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\ncedro;esgoto;Rede geral ou fossa séptica (declarado ao Censo);17;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\ncedro;esgoto;Fossa rudimentar, vala, rio ou outra forma;8;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\ncedro;lixo;Coletado, direta ou indiretamente;21;adequado;;IBGE (2024), Censo 2022\ncedro;lixo;Queimado, enterrado ou outro destino na propriedade;4;sem atendimento;;IBGE (2024), Censo 2022\nregi;agua;Rede geral, canalizada dentro de casa;1;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nregi;agua;Poço, nascente ou mina, canalizada dentro de casa;54;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nregi;agua;Carro-pipa, água de chuva ou rio;3;precário;precário ou sem atendimento;IBGE (2024), Censo 2022\nregi;esgoto;Rede geral ou fossa séptica (declarado ao Censo);27;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\nregi;esgoto;Fossa rudimentar, vala, rio ou outra forma;31;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\nregi;lixo;Coletado, direta ou indiretamente;56;adequado;;IBGE (2024), Censo 2022\nregi;lixo;Queimado, enterrado ou outro destino na propriedade;2;sem atendimento;;IBGE (2024), Censo 2022\npppa;agua;Poço, nascente ou mina, canalizada dentro de casa;71;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\npppa;esgoto;Rede geral ou fossa séptica (declarado ao Censo);53;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\npppa;esgoto;Fossa rudimentar, vala, rio ou outra forma;18;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\npppa;lixo;Coletado, direta ou indiretamente;55;adequado;;IBGE (2024), Censo 2022\npppa;lixo;Queimado, enterrado ou outro destino na propriedade;16;sem atendimento;;IBGE (2024), Censo 2022\nrgts;agua;Poço, nascente ou mina, canalizada dentro de casa;48;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nrgts;esgoto;Rede geral ou fossa séptica (declarado ao Censo);20;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\nrgts;esgoto;Fossa rudimentar, vala, rio ou outra forma;28;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\nrgts;lixo;Coletado, direta ou indiretamente;38;adequado;;IBGE (2024), Censo 2022\nrgts;lixo;Queimado, enterrado ou outro destino na propriedade;10;sem atendimento;;IBGE (2024), Censo 2022\n", "municipio": "grupo;indicador;descricao;valor_pct;cor;fonte\nagua;SINISA;rede da prestadora;50,29;neutro;Brasil (2025a)\nagua;ODS 6.1.1 (ANA);canalizada, qualquer fonte;95,5;azul;ANA (2025)\nesgoto;IBGE, Censo 2022;rede geral ou pluvial;39,36;neutro;IBGE (2026)\nesgoto;SINISA;rede da prestadora;40,73;neutro;Brasil (2025a)\nesgoto;ODS 6.2.1a (ANA);rede + fossa séptica ajustada;48,9;verde;ANA (2025)\nrural;Água por rede;368 pessoas;9,66;azul;Brasil (2025a)\nrural;Esgoto por rede;nenhum morador rural;0;verde;Brasil (2025a)\nrural;Coleta de lixo;serviço da Prefeitura;75,79;neutro;Brasil (2025a)\n"};
+const RESERVA={"comunidades": "id;nome;familias;area_ha;reconhecimento;dentro_rds;situacao_ibge;pessoas_quilombolas;domicilios;fonte;observacao\ncedro;Cedro;23;1066,11;2009-05-09;sim;Estudo técnico;59;25;Censo;\"Todos os 25 domicílios têm banheiro exclusivo e água canalizada dentro de casa, de poço, nascente ou mina; nenhum está ligado à rede geral. Oito usam fossa rudimentar ou pior.\"\nregi;Reginaldo;94;1279,68;2009-11-20;não;Estudo técnico;143;58;Censo;Única comunidade com domicílio ligado à rede geral (1 de 58) e com domicílios que dependem de carro-pipa, chuva ou rio (3). Mais da metade usa fossa rudimentar ou pior. Fica fora da RDS.\npppa;Pedra Preta/Paraíso;80;3280,26;2009-12-23;sim;Titulado;179;71;Censo;\"Maior território em população. Três de cada quatro domicílios declaram rede ou fossa séptica, mas 16 não têm coleta de lixo. O IBGE registra o território como titulado; o ITESP, não.\"\nrgts;Ribeirão Grande/Terra Seca;77;3471,04;2008-11-27;sim;Titulado;134;48;Censo;\"Pior situação de esgoto entre os territórios com dado: 28 de 48 domicílios (58%) usam fossa rudimentar ou pior. O IBGE registra o território como titulado; o ITESP, não.\"\nilhas;Ilhas;19;794,93;2025-08-04;não;;;;Vistoria;Reconhecida pelo ITESP em agosto de 2025, depois do Censo 2022. Não há dado oficial por domicílio: tudo virá da vistoria de campo.\n", "atendimento": "comunidade_id;componente;solucao;domicilios;classe_pnsr;observacao;fonte\ncedro;agua;Poço, nascente ou mina, canalizada dentro de casa;25;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\ncedro;esgoto;Rede geral ou fossa séptica (declarado ao Censo);17;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\ncedro;esgoto;Fossa rudimentar, vala, rio ou outra forma;8;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\ncedro;lixo;Coletado, direta ou indiretamente;21;adequado;;IBGE (2024), Censo 2022\ncedro;lixo;Queimado, enterrado ou outro destino na propriedade;4;sem atendimento;;IBGE (2024), Censo 2022\nregi;agua;Rede geral, canalizada dentro de casa;1;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nregi;agua;Poço, nascente ou mina, canalizada dentro de casa;54;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nregi;agua;Carro-pipa, água de chuva ou rio;3;precário;precário ou sem atendimento;IBGE (2024), Censo 2022\nregi;esgoto;Rede geral ou fossa séptica (declarado ao Censo);27;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\nregi;esgoto;Fossa rudimentar, vala, rio ou outra forma;31;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\nregi;lixo;Coletado, direta ou indiretamente;56;adequado;;IBGE (2024), Censo 2022\nregi;lixo;Queimado, enterrado ou outro destino na propriedade;2;sem atendimento;;IBGE (2024), Censo 2022\npppa;agua;Poço, nascente ou mina, canalizada dentro de casa;71;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\npppa;esgoto;Rede geral ou fossa séptica (declarado ao Censo);53;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\npppa;esgoto;Fossa rudimentar, vala, rio ou outra forma;18;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\npppa;lixo;Coletado, direta ou indiretamente;55;adequado;;IBGE (2024), Censo 2022\npppa;lixo;Queimado, enterrado ou outro destino na propriedade;16;sem atendimento;;IBGE (2024), Censo 2022\nrgts;agua;Poço, nascente ou mina, canalizada dentro de casa;48;a confirmar;sem vigilância no SISAGUA;IBGE (2024), Censo 2022\nrgts;esgoto;Rede geral ou fossa séptica (declarado ao Censo);20;a confirmar;vistoria confirma se é séptica;IBGE (2024), Censo 2022\nrgts;esgoto;Fossa rudimentar, vala, rio ou outra forma;28;precário;\"precário ou sem atendimento; o Censo não separa\";IBGE (2024), Censo 2022\nrgts;lixo;Coletado, direta ou indiretamente;38;adequado;;IBGE (2024), Censo 2022\nrgts;lixo;Queimado, enterrado ou outro destino na propriedade;10;sem atendimento;;IBGE (2024), Censo 2022\n", "municipio": "componente;fonte;quem_publica;ano;criterio;municipio_todo;zona_urbana;zona_rural;nota;referencia\nagua;SINISA;Sistema Nacional de Informações em Saneamento (Ministério das Cidades), com dados informados pela Sabesp;2024;Só quem recebe água pela rede da Sabesp.;50,29;100;9,66;Na zona rural, 368 das 3.809 pessoas.;Brasil (2025a)\nagua;ODS 6 (indicador 6.1.1);Agência Nacional de Águas e Saneamento Básico (ANA), com dados do Censo 2022;2025;Água canalizada dentro de casa, venha da rede ou de poço e nascente. Não verifica se a água é potável.;95,5;;;;ANA (2025)\nesgoto;SINISA;Sistema Nacional de Informações em Saneamento (Ministério das Cidades), com dados informados pela Sabesp;2024;Só quem está ligado à rede de esgoto da Sabesp.;40,73;90,56;0;O mesmo sistema registra 2,5% dos domicílios rurais com coleta e tratamento.;Brasil (2025a)\nesgoto;Censo 2022;Instituto Brasileiro de Geografia e Estatística (IBGE);2022;Domicílios ligados à rede geral de esgoto ou de águas pluviais, conforme declarado ao recenseador.;39,36;;;;IBGE (2026)\nesgoto;ODS 6 (indicador 6.2.1a);Agência Nacional de Águas e Saneamento Básico (ANA), com dados do Censo 2022;2025;Rede de esgoto com tratamento, mais quem tem fossa séptica. A fossa conta com peso de 40%, porque não se sabe se é bem mantida.;48,9;;;;ANA (2025)\nlixo;SINISA;Sistema Nacional de Informações em Saneamento (Ministério das Cidades), com dados informados pela Prefeitura;2024;Coleta de lixo domiciliar pela Prefeitura.;86,68;100;75,79;;Brasil (2025a)\n"};
 let data=[],B={},MUN={};
 function parseCSV(t){
   t=t.replace(/^\ufeff/,"");const rows=[];let row=[],f="",q=false;
@@ -262,7 +277,7 @@ function montar(t){
   B={};data.forEach(d=>B[d.id]={});
   parseCSV(t.atendimento).forEach(r=>{const b=B[r.comunidade_id];if(!b)return;const n=num(r.domicilios);if(n==null)return;
     (b[r.componente]=b[r.componente]||[]).push([r.solucao,n,CLS[(r.classe_pnsr||"").toLowerCase()]||"nd",r.observacao||""]);});
-  MUN={};parseCSV(t.municipio).forEach(r=>(MUN[r.grupo]=MUN[r.grupo]||[]).push([r.indicador,r.descricao,num(r.valor_pct)||0,COR[(r.cor||"").toLowerCase()]||COR.neutro]));
+  MUN=parseCSV(t.municipio).map(r=>({comp:r.componente,fonte:r.fonte,quem:r.quem_publica,ano:r.ano,crit:r.criterio,v:[num(r.municipio_todo),num(r.zona_urbana),num(r.zona_rural)],nota:r.nota,ref:r.referencia}));
 }
 const ESTADO={falhas:[],reserva:false,data:null};
 const DATA_RESERVA="12/11/2026";
@@ -385,8 +400,17 @@ function detail(){
    <ul class="steps">${st.map(([t,ok])=>`<li class="${ok?"done":"todo"}"><b>${ok?"✓":"○"}</b>${t}</li>`).join("")}</ul></div>`;
 }
 
-function hbars(id,list){
-  document.getElementById(id).innerHTML=list.map(([n,s,v,c])=>`<div class="hr"><span>${n}<small>${s}</small></span><div class="t" role="img" aria-label="${n}: ${pct(v,1)}"><i style="width:${v}%;background:${c}"></i></div><span class="c">${pct(v,1)}</span></div>`).join("");
+function municipio(){
+  const G={agua:"Abastecimento de água",esgoto:"Esgotamento sanitário",lixo:"Coleta de lixo"};
+  const cel=v=>v==null?`<td class="na">não informado</td>`:`<td><div class="val"><span>${pct(v,1)}</span><i><u style="width:${Math.min(v,100)}%"></u></i></div></td>`;
+  let h=`<div class="mt"><table><thead><tr><th>Fonte</th><th>O que essa fonte conta como "atendido"</th><th class="v">Município todo</th><th class="v">Cidade (zona urbana)</th><th class="v">Zona rural</th></tr></thead><tbody>`;
+  Object.keys(G).forEach(c=>{const rows=MUN.filter(r=>r.comp===c);if(!rows.length)return;
+    h+=`<tr class="grp"><td colspan="5">${G[c]}</td></tr>`;
+    rows.forEach(r=>{h+=`<tr><td class="f"><b>${esc(r.fonte)}</b><small>${esc(r.quem)}, ${esc(r.ano)}</small></td><td class="crit">${esc(r.crit)}${r.nota?`<br><small class="na">${esc(r.nota)}</small>`:""}</td>${r.v.map(cel).join("")}</tr>`;});
+  });
+  h+=`</tbody></table></div>`;
+  document.getElementById("mun-tab").innerHTML=h;
+  document.getElementById("mun-pop").innerHTML=`<span>População de Barra do Turvo: <b>6.922</b> pessoas</span><span>Cidade: <b>3.113</b></span><span>Zona rural: <b>3.809</b>, onde ficam as comunidades quilombolas</span><span class="na">Fonte: SINISA, dados de 2024</span>`;
 }
 
 /* ---------- Tooltip ---------- */
@@ -527,7 +551,7 @@ document.getElementById("ex-copy").addEventListener("click",()=>{
   copiarRico(html,txt,`Tabela com ${l.length} comunidade${l.length>1?"s":""} copiada. Cole no Word ou no Excel.`,prev.querySelector("table"));
 });
 
-hbars("hb-agua",MUN.agua);hbars("hb-esg",MUN.esgoto);hbars("hb-rur",MUN.rural);
+municipio();
 kpis();grid();detail();
 }
 carregar().then(()=>{iniciar();avisoDados();});

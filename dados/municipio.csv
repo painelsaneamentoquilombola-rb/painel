@@ -1,9 +1,7 @@
-﻿grupo;indicador;descricao;valor_pct;cor;fonte
-agua;SINISA;rede da prestadora;50,29;neutro;Brasil (2025a)
-agua;ODS 6.1.1 (ANA);canalizada, qualquer fonte;95,5;azul;ANA (2025)
-esgoto;IBGE, Censo 2022;rede geral ou pluvial;39,36;neutro;IBGE (2026)
-esgoto;SINISA;rede da prestadora;40,73;neutro;Brasil (2025a)
-esgoto;ODS 6.2.1a (ANA);rede + fossa séptica ajustada;48,9;verde;ANA (2025)
-rural;Água por rede;368 pessoas;9,66;azul;Brasil (2025a)
-rural;Esgoto por rede;nenhum morador rural;0;verde;Brasil (2025a)
-rural;Coleta de lixo;serviço da Prefeitura;75,79;neutro;Brasil (2025a)
+﻿componente;fonte;quem_publica;ano;criterio;municipio_todo;zona_urbana;zona_rural;nota;referencia
+agua;SINISA;Sistema Nacional de Informações em Saneamento (Ministério das Cidades), com dados informados pela Sabesp;2024;Só quem recebe água pela rede da Sabesp.;50,29;100;9,66;Na zona rural, 368 das 3.809 pessoas.;Brasil (2025a)
+agua;ODS 6 (indicador 6.1.1);Agência Nacional de Águas e Saneamento Básico (ANA), com dados do Censo 2022;2025;Água canalizada dentro de casa, venha da rede ou de poço e nascente. Não verifica se a água é potável.;95,5;;;;ANA (2025)
+esgoto;SINISA;Sistema Nacional de Informações em Saneamento (Ministério das Cidades), com dados informados pela Sabesp;2024;Só quem está ligado à rede de esgoto da Sabesp.;40,73;90,56;0;O mesmo sistema registra 2,5% dos domicílios rurais com coleta e tratamento.;Brasil (2025a)
+esgoto;Censo 2022;Instituto Brasileiro de Geografia e Estatística (IBGE);2022;Domicílios ligados à rede geral de esgoto ou de águas pluviais, conforme declarado ao recenseador.;39,36;;;;IBGE (2026)
+esgoto;ODS 6 (indicador 6.2.1a);Agência Nacional de Águas e Saneamento Básico (ANA), com dados do Censo 2022;2025;Rede de esgoto com tratamento, mais quem tem fossa séptica. A fossa conta com peso de 40%, porque não se sabe se é bem mantida.;48,9;;;;ANA (2025)
+lixo;SINISA;Sistema Nacional de Informações em Saneamento (Ministério das Cidades), com dados informados pela Prefeitura;2024;Coleta de lixo domiciliar pela Prefeitura.;86,68;100;75,79;;Brasil (2025a)

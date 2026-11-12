@@ -54,16 +54,22 @@ Regras para não quebrar o painel:
 
 Componente sem nenhuma linha aparece no painel como "sem dado". Quando a vistoria de campo for feita, basta substituir as linhas do Censo pelas linhas da vistoria, com a classe PNSR verificada.
 
-### `municipio.csv` – indicadores municipais de contexto
+### `municipio.csv` – o que as fontes oficiais dizem sobre o município
+
+Uma linha por fonte e componente. Os percentuais são da população (ou dos domicílios, no lixo); deixe a célula vazia quando a fonte não separa cidade e zona rural.
 
 | Coluna | Conteúdo |
 |---|---|
-| grupo | `agua`, `esgoto` ou `rural` |
-| indicador | nome da fonte ou do indicador |
-| descricao | o que a fonte conta como atendimento |
-| valor_pct | percentual, com vírgula decimal |
-| cor | `azul`, `verde` ou `neutro` (cor da barra) |
-| fonte | referência |
+| componente | `agua`, `esgoto` ou `lixo` |
+| fonte | nome curto da fonte (ex.: `SINISA`) |
+| quem_publica | órgão responsável e origem dos dados, por extenso |
+| ano | ano dos dados |
+| criterio | o que essa fonte conta como "atendido", em linguagem simples |
+| municipio_todo | percentual no município inteiro, com vírgula decimal |
+| zona_urbana | percentual na cidade |
+| zona_rural | percentual na zona rural |
+| nota | observação curta (opcional) |
+| referencia | citação da fonte |
 
 ## Fontes
 
