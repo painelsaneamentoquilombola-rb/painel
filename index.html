@@ -9,8 +9,10 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
-/* Layout: cabeçalho, indicadores, matriz PNSR por comunidade com ficha ao lado (empilha no celular), leituras do município, exportação */
+/* Layout: cabeçalho, indicadores, mapa interativo (camadas da pasta mapa/), matriz PNSR por comunidade com ficha ao lado (empilha no celular), leituras do município, exportação */
 :root{
   --bg:#f3f6f4; --surface:#ffffff; --ink:#15231e; --muted:#5a6b64; --line:#d8e1dc;
   --brand:#0f5c4a; --brand-soft:#e1efe9;
@@ -157,6 +159,48 @@ summary{cursor:pointer;font-weight:600;font-size:14px}
 button.primary{background:var(--brand);color:var(--surface);border-color:var(--brand);font-weight:600}
 button:disabled{opacity:.5;cursor:not-allowed}
 footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+/* ---------- Mapa ---------- */
+.mapa{display:grid;gap:8px}
+@media (max-width:900px){.mapa{grid-template-columns:minmax(0,1fr)}}
+.mapbox{position:relative;height:min(78vh,720px);min-height:520px;overflow:hidden}
+@media (max-width:900px){.mapbox{min-height:460px}}
+#map{position:absolute;inset:0;border-radius:10px;background:var(--nd-bg)}
+.mapa .detail{max-height:none}
+.mhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.lyr{position:absolute;right:10px;top:10px;z-index:1000;width:250px;background:#fff;color:#15231e;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);padding:10px 12px;font-size:13px}
+.lyr h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#0f5c4a;margin:4px 0 4px;text-transform:uppercase;font-weight:500}
+.lyr label{display:flex;align-items:center;gap:7px;padding:2px 0;cursor:pointer}
+.lyr input{accent-color:#0f5c4a;margin:0}
+.lyr .sw{width:20px;height:11px;border-radius:2px;flex:none}
+.lyr hr{border:0;border-top:1px solid #d8e1dc;margin:6px 0}
+.lyr .tg{display:none;width:100%;text-align:left;font-size:13px;padding:4px 8px}
+.lyr button.go{font-size:12.5px;padding:4px 8px;margin:2px 4px 2px 0;background:#f3f6f4;color:#15231e;border-color:#d8e1dc}
+@media (max-width:640px){.lyr{width:auto;left:10px;right:10px;top:auto;bottom:10px;max-height:55%;overflow:auto}.lyr .tg{display:block}.lyr.closed .bd{display:none}}
+.leaflet-container{font-family:var(--body)}
+.leaflet-popup-content{font-size:13.5px;margin:10px 12px;min-width:200px;color:#15231e}
+.pp .k{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:#0f5c4a;text-transform:uppercase;margin-top:7px}
+.pp .k:first-child{margin-top:0}
+.pp .v{font-weight:600}.pp .s{color:#5a6b64;font-size:12.5px}
+.pp .go{color:#0f5c4a;font-weight:600;font-size:12.5px;margin-top:6px}
+.lbl{background:transparent;border:0;box-shadow:none;color:#fff;font-weight:700;font-size:12.5px;text-shadow:0 0 3px #000,0 0 3px #000;padding:0}
+.lbl:before{display:none}
+.nolabels .lbl{display:none}
+.mapnote{font-size:12.5px;color:var(--muted);margin:0}
+.ver{font:inherit;font-size:13px;font-weight:600;color:var(--brand);background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.pp .pill{font-size:11.5px;padding:2px 7px}
+.pp .kv{margin:6px 0 2px;gap:0;border-top:1px solid #d8e1dc}
+.pp .kv div{padding:4px 0;font-size:13px;border-bottom:1px dashed #d8e1dc}
+.pp .kv span:first-child{color:#5a6b64}
+.pp .ver{color:#0f5c4a;margin-top:7px;display:block}
+.leaflet-popup-content{min-width:270px}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:rgba(255,255,255,.88);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.logos{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 20px;display:flex;flex-wrap:wrap;gap:20px 48px;align-items:flex-start;justify-content:center}
+.logos .g{display:grid;gap:10px;justify-items:center}
+.logos .t{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5a6b64}
+.logos .r{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:center}
+.logos img{height:76px;width:auto;display:block}
+.logos img.wide{height:84px}
+@media (max-width:480px){.logos img{height:58px}.logos img.wide{height:64px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -179,7 +223,31 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 
   <section class="kpis" id="kpis" aria-label="Indicadores-resumo"></section>
 
-  <div class="main">
+  <section class="mapa" id="mapa" aria-label="Mapa dos territórios e ficha da comunidade">
+    <div class="panel mapbox">
+      <div id="map" aria-label="Mapa interativo dos territórios quilombolas"></div>
+      <div class="lyr" id="lyr">
+        <button class="tg" id="lyr-tg">Camadas ▾</button>
+        <div class="bd">
+        <h4>Camadas</h4>
+        <label><input type="checkbox" data-l="ucs" checked><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
+        <label><input type="checkbox" data-l="quilombos" checked><span class="sw" style="background:#eb7300;border:1px solid #232323"></span>Territórios quilombolas</label>
+        <label><input type="checkbox" data-l="subbacias" checked><span class="sw" style="border:2px solid #3da2f9"></span>Sub-bacias</label>
+        <label><input type="checkbox" data-l="municipios"><span class="sw" style="background:rgba(190,178,151,.6);border:1px solid #232323"></span>Municípios com quilombos</label>
+        <label><input type="checkbox" data-l="ugrhi" checked><span class="sw" style="border:3px solid #bfbfbf"></span>Limite da UGRHI 11</label>
+        <label><input type="checkbox" id="lb" checked><span class="sw"></span>Nomes das comunidades</label>
+        <hr><h4>Mapa de fundo</h4>
+        <label><input type="radio" name="bm" value="sat" checked>Satélite</label>
+        <label><input type="radio" name="bm" value="ruas">Vias, ruas e estradas</label>
+        <label><input type="radio" name="bm" value="topo">Topográfico, com relevo</label>
+        <hr><button class="go" id="goBT">Barra do Turvo</button><button class="go" id="goUG">UGRHI 11 inteira</button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+
+  <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
       <div class="tablebox"><div class="grid" id="grid"></div></div>
       <div class="legend">
@@ -227,6 +295,17 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
     </div>
     <div id="ex-prev" class="prev" hidden></div>
     <p class="sub" style="margin:0">O relatório abre no navegador e pode ser impresso ou salvo em PDF. A planilha abre no Excel ou no Google Sheets. "Copiar tabela" cola direto no Word ou no Excel.</p>
+  </section>
+
+  <section class="logos" aria-label="Realização e apoio">
+    <div class="g"><span class="t">Realização</span><div class="r">
+      <img src="img/logo-unesp.png" alt="UNESP – Universidade Estadual Paulista">
+      <img class="wide" src="img/logo-profagua.png" alt="ProfÁgua – Mestrado Profissional em Rede Nacional em Gestão e Regulação de Recursos Hídricos">
+    </div></div>
+    <div class="g"><span class="t">Apoio</span><div class="r">
+      <img src="img/logo-capes.png" alt="CAPES – Coordenação de Aperfeiçoamento de Pessoal de Nível Superior">
+      <img src="img/logo-ana.png" alt="ANA – Agência Nacional de Águas e Saneamento Básico">
+    </div></div>
   </section>
 
   <footer class="f">
@@ -449,7 +528,7 @@ gridEl.addEventListener("click",e=>{
   const r=e.target.closest(".row[data-id]");if(r)choose(r.dataset.id);
 });
 gridEl.addEventListener("keydown",e=>{const r=e.target.closest(".row[data-id]");if(r&&e.target===r&&(e.key==="Enter"||e.key===" ")){e.preventDefault();choose(r.dataset.id);}});
-function choose(id){if(sel===id)return;sel=id;try{localStorage.setItem("sq-sel",id);}catch(e){}document.querySelectorAll(".row.sel").forEach(x=>x.classList.remove("sel"));const r=document.querySelector(`.row[data-id="${id}"]`);if(r)r.classList.add("sel");detail();}
+function choose(id){if(sel===id)return;sel=id;try{localStorage.setItem("sq-sel",id);}catch(e){}document.querySelectorAll(".row.sel").forEach(x=>x.classList.remove("sel"));const r=document.querySelector(`.row[data-id="${id}"]`);if(r)r.classList.add("sel");detail();if(window.mapSel)mapSel(id,false);}
 document.addEventListener("click",e=>{if(!e.target.closest(".cell")&&!e.target.closest(".tip")){pinned=null;tip.hidden=true;}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){pinned=null;tip.hidden=true;}});
 window.addEventListener("scroll",()=>{if(!pinned)tip.hidden=true;},{passive:true});
@@ -556,6 +635,82 @@ document.getElementById("ex-copy").addEventListener("click",()=>{
 
 municipio();
 kpis();grid();detail();
+/* ---------- Mapa: camadas lidas da pasta mapa/ (GeoJSON exportado do projeto QGIS) ---------- */
+(async function(){
+const L=window.L; // Leaflet (o painel já usa o nome L para os rótulos das classes)
+const GEO={};
+const ITESP_ID={'Cedro':'cedro','Reginaldo':'regi','Pedra Preta/Paraiso':'pppa','Pedra Preta/Paraíso':'pppa','Ribeirão Grande/Terra Seca':'rgts','Bairro Ilhas':'ilhas','Ilhas':'ilhas'};
+try{await Promise.all(['ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
+catch(e){document.getElementById('map').innerHTML='<p class="sub" style="padding:16px">Não foi possível carregar as camadas do mapa. O restante do painel segue funcionando.</p>';return;}
+const map=L.map('map',{zoomControl:true}).setView([-24.85,-48.45],11);
+map.createPane('ruasPane');map.getPane('ruasPane').style.zIndex=470;map.getPane('ruasPane').style.pointerEvents='none';
+const E='https://server.arcgisonline.com/ArcGIS/rest/services/';
+const base={
+  sat:L.tileLayer(E+'World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Imagem: Esri, Maxar, Earthstar Geographics'}),
+  ruas:L.layerGroup([L.tileLayer(E+'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'}),
+    L.tileLayer(E+'Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,pane:'ruasPane'}),
+    L.tileLayer(E+'Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,pane:'ruasPane'})]),
+  topo:L.tileLayer(E+'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'})
+};
+base.sat.addTo(map);
+map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas');
+const order=['ugrhi','municipios','subbacias','quilombos','ucs'];
+order.forEach((p,i)=>{map.createPane(p);map.getPane(p).style.zIndex=400+i*10;map.getPane(p).style.pointerEvents='none';});
+map.createPane('selPane');map.getPane('selPane').style.zIndex=460;map.getPane('selPane').style.pointerEvents='none';
+const style={ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
+  subbacias:{color:'#3da2f9',weight:1,fill:false},quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.8},
+  ucs:{color:'#4fc982',weight:1.6,fillColor:'url(#hatch)',fillOpacity:1}};
+const layers={};
+for(const k of order){const renderer=L.svg({pane:k});
+  layers[k]=L.geoJSON(GEO[k],{pane:k,renderer,interactive:false,style:()=>style[k]});
+  if(k!=='municipios')layers[k].addTo(map);
+  if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
+    defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
+const labels=L.layerGroup().addTo(map);
+GEO.quilombos.features.forEach(f=>{const c=L.geoJSON(f).getBounds().getCenter();
+  L.tooltip({permanent:true,direction:'center',className:'lbl',interactive:false}).setLatLng(c).setContent(f.properties.comunidade).addTo(labels);});
+const mapEl=document.getElementById('map');
+const updLabels=()=>mapEl.classList.toggle('nolabels',map.getZoom()<10||!document.getElementById('lb').checked);
+map.on('zoomend',updLabels);
+const btF=GEO.quilombos.features.filter(f=>f.properties.municipio==='Barra do Turvo');
+const bt=L.geoJSON({type:'FeatureCollection',features:btF}).getBounds().pad(0.08);
+map.fitBounds(bt);updLabels();
+document.getElementById('goBT').onclick=()=>map.flyToBounds(bt);
+document.getElementById('goUG').onclick=()=>map.flyToBounds(layers.ugrhi.getBounds());
+document.querySelectorAll('.lyr input[data-l]').forEach(cb=>cb.onchange=()=>{const l=layers[cb.dataset.l];cb.checked?map.addLayer(l):map.removeLayer(l);
+  if(cb.dataset.l==='quilombos'){cb.checked?map.addLayer(labels):map.removeLayer(labels);}});
+document.getElementById('lb').onchange=updLabels;
+document.querySelectorAll('.lyr input[name=bm]').forEach(r=>r.onchange=()=>{for(const k in base)map.removeLayer(base[k]);base[r.value].addTo(map);if(base[r.value].bringToBack)base[r.value].bringToBack();});
+if(matchMedia('(max-width:640px)').matches)document.getElementById('lyr').classList.add('closed');
+document.getElementById('lyr-tg').onclick=()=>document.getElementById('lyr').classList.toggle('closed');
+L.DomEvent.disableClickPropagation(document.getElementById('lyr'));L.DomEvent.disableScrollPropagation(document.getElementById('lyr'));
+// destaque da comunidade selecionada
+let selLayer=null;
+window.mapSel=(id,fly)=>{if(selLayer)map.removeLayer(selLayer);
+  const f=btF.find(x=>ITESP_ID[x.properties.comunidade]===id);if(!f)return;
+  selLayer=L.geoJSON(f,{pane:'selPane',interactive:false,style:{color:'#ffe14d',weight:3.5,fill:false}}).addTo(map);
+  if(fly)map.flyToBounds(selLayer.getBounds().pad(0.6),{maxZoom:13,duration:.6});};
+mapSel(sel,false);
+// clique
+function inRing(pt,ring){let x=pt[0],y=pt[1],ins=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+  if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))ins=!ins;}return ins;}
+function inGeom(pt,g){const polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;return polys.some(p=>inRing(pt,p[0])&&!p.slice(1).some(h=>inRing(pt,h)));}
+const hit=(k,pt)=>map.hasLayer(layers[k])?GEO[k].features.filter(f=>inGeom(pt,f.geometry)):[];
+map.on('click',e=>{const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
+  hit('quilombos',pt).forEach(f=>{const id=ITESP_ID[f.properties.comunidade];const d=id&&data.find(x=>x.id===id);if(d)alvo=id;
+    h+=`<div class="k">Território quilombola</div><div class="v">${f.properties.comunidade}</div><div class="s">${f.properties.municipio} · ${f.properties.situacao} (ITESP)</div>`;
+    if(d)h+=`<div class="kv">${IND.slice(0,4).map(k=>`<div><span>${NOME[k]}</span>${pill(resumo(d.id,k).cls)}</div>`).join('')}
+      <div><span>Famílias (ITESP)</span><span class="num">${d.fam}</span></div><div><span>Área</span><span class="num">${d.area} ha</span></div>
+      <div><span>Reconhecimento</span><span class="num">${d.rec}</span></div>${d.dom?`<div><span>Pessoas quilombolas · domicílios</span><span class="num">${d.pes} · ${d.dom}</span></div>`:''}</div>
+      <button class="ver" data-ficha="${d.id}">Abrir ficha completa ↓</button>`;});
+  hit('ucs',pt).forEach(f=>h+=`<div class="k">Unidade de conservação</div><div class="v">${f.properties.Unidade}</div><div class="s">${f.properties.OrgaoGesto||''}</div>`);
+  hit('subbacias',pt).forEach(f=>h+=`<div class="k">Sub-bacia</div><div class="v">${f.properties.DSUBBC}</div>`);
+  hit('municipios',pt).forEach(f=>h+=`<div class="k">Município</div><div class="v">${f.properties.municipio}</div>`);
+  if(!h)h='<div class="s">Fora das camadas ligadas.</div>';
+  L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pp">${h}</div>`).openOn(map);
+  if(alvo)mapSel(alvo,false);});
+mapEl.addEventListener('click',e=>{const b=e.target.closest('[data-ficha]');if(!b)return;choose(b.dataset.ficha);mapSel(b.dataset.ficha,false);document.getElementById('matriz').scrollIntoView({behavior:'smooth',block:'start'});});
+})();
 }
 carregar().then(()=>{iniciar();avisoDados();});
 </script>
