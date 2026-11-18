@@ -9,7 +9,7 @@ Produto técnico-tecnológico da dissertação de mestrado de Luiz Henrique Dias
 - `index.html` é a página do painel. Ela não guarda os números: lê os arquivos da pasta `dados/` toda vez que é aberta.
 - `dados/` contém três planilhas em formato CSV (texto separado por ponto e vírgula, que o Excel abre normalmente).
 - `mapa/` contém as camadas do mapa interativo em GeoJSON, exportadas do projeto QGIS: limite da UGRHI 11 (SP Águas), municípios e territórios quilombolas (ITESP), unidades de conservação de uso sustentável e sub-bacias (DataGEO). A ficha que aparece ao clicar num território lê as mesmas planilhas de `dados/`, então atualizar o CSV atualiza também o mapa.
-- `img/` contém os logotipos da faixa "Realização e apoio".
+- `img/` contém os logotipos da faixa "Realização, fomento e apoio".
 
 ## Como atualizar os dados
 
