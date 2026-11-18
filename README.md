@@ -35,7 +35,7 @@ Regras para não quebrar o painel:
 | familias | número de famílias (ITESP) |
 | area_ha | área do território, em hectares |
 | reconhecimento | data do reconhecimento pelo ITESP, no formato AAAA-MM-DD |
-| dentro_rds | `sim` ou `não`: se o território está na RDS Quilombos de Barra do Turvo |
+| dentro_rds | `sim`, `parcialmente` ou `não`: se o território está na RDS Quilombos de Barra do Turvo |
 | situacao_ibge | situação fundiária registrada pelo IBGE (vazio se não houver dado) |
 | pessoas_quilombolas | pessoas quilombolas recenseadas no território (Censo 2022) |
 | domicilios | domicílios com pelo menos um morador quilombola (Censo 2022) |
