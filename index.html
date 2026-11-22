@@ -181,6 +181,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .munlist button{font:inherit;font-size:12px;color:#15231e;background:rgba(243,246,244,.7);border:1px solid #d8e1dc;border-radius:5px;padding:3px 6px;cursor:pointer;text-align:left;line-height:1.25}
 .munlist button:hover,.munlist button.on{border-color:#0f5c4a;color:#0f5c4a}
 .munlist small{color:#5a6b64}
+.dlmsg{display:block;font-size:11.5px;color:#5a6b64;margin-top:2px}
 .lyr hr{border:0;border-top:1px solid #d8e1dc;margin:6px 0}
 .lyr .tg{display:none;width:100%;text-align:left;font-size:13px;padding:4px 8px}
 .lyr button.go{font-size:12.5px;padding:4px 8px;margin:2px 4px 2px 0;background:#f3f6f4;color:#15231e;border-color:#d8e1dc}
@@ -259,6 +260,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
         <label><input type="radio" name="bm" value="ruas">Vias, ruas e estradas</label>
         <label><input type="radio" name="bm" value="topo">Topográfico, com relevo</label>
         <hr><button class="go" id="goBT">Barra do Turvo</button><button class="go" id="goUG">UGRHI 11 inteira</button>
+        <hr><h4>Baixar o mapa</h4><button class="go" id="dlPNG">Imagem (PNG)</button><button class="go" id="dlPDF">PDF</button><span class="dlmsg" id="dlmsg"></span>
         </div>
       </div>
     </div>
@@ -674,11 +676,11 @@ const map=L.map('map',{zoomControl:true}).setView([-24.85,-48.45],11);
 map.createPane('ruasPane');map.getPane('ruasPane').style.zIndex=470;map.getPane('ruasPane').style.pointerEvents='none';
 const E='https://server.arcgisonline.com/ArcGIS/rest/services/';
 const base={
-  sat:L.tileLayer(E+'World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Imagem: Esri, Maxar, Earthstar Geographics'}),
-  ruas:L.layerGroup([L.tileLayer(E+'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'}),
-    L.tileLayer(E+'Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,pane:'ruasPane'}),
-    L.tileLayer(E+'Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,pane:'ruasPane'})]),
-  topo:L.tileLayer(E+'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'})
+  sat:L.tileLayer(E+'World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,crossOrigin:true,attribution:'Imagem: Esri, Maxar, Earthstar Geographics'}),
+  ruas:L.layerGroup([L.tileLayer(E+'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,crossOrigin:true,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'}),
+    L.tileLayer(E+'Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,crossOrigin:true,pane:'ruasPane'}),
+    L.tileLayer(E+'Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{maxZoom:16,crossOrigin:true,pane:'ruasPane'})]),
+  topo:L.tileLayer(E+'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,crossOrigin:true,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'})
 };
 base.sat.addTo(map);
 map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB, SGB');
@@ -762,6 +764,94 @@ function rioPerto(latlng){if(!map.hasLayer(layers.hidrografia))return null;const
     for(const l of (f.geometry.type==='LineString'?[f.geometry.coordinates]:f.geometry.coordinates)){let q=map.latLngToLayerPoint([l[0][1],l[0][0]]);
       for(let i=1;i<l.length;i++){const r=map.latLngToLayerPoint([l[i][1],l[i][0]]);const dd=segDist(P,q,r);if(dd<bd){bd=dd;best=f;}q=r;}}}
   return best;}
+
+// ---------- Baixar o mapa: monta uma imagem da vista atual, com legenda, escala e fontes ----------
+const LEG={
+  ucs:['UCs de uso sustentável (DataGEO)',(c,x,y)=>{c.save();c.beginPath();c.rect(x,y,22,12);c.clip();c.strokeStyle='#4fc982';c.lineWidth=1.4;for(let i=-12;i<34;i+=5){c.beginPath();c.moveTo(x+i,y+12);c.lineTo(x+i+12,y);c.stroke();}c.restore();c.strokeStyle='#4fc982';c.lineWidth=1.5;c.strokeRect(x,y,22,12);}],
+  quilombos:['Territórios quilombolas (ITESP)',(c,x,y)=>{c.fillStyle='#eb7300';c.fillRect(x,y,22,12);c.strokeStyle='#232323';c.lineWidth=1;c.strokeRect(x,y,22,12);}],
+  hidrografia:['Hidrografia (CETESB)',(c,x,y)=>{c.strokeStyle='#8c97e1';c.lineWidth=2;c.beginPath();c.moveTo(x,y+6);c.lineTo(x+22,y+6);c.stroke();}],
+  subbacias:['Sub-bacias (DataGEO)',(c,x,y)=>{c.strokeStyle='#3da2f9';c.lineWidth=2;c.strokeRect(x+1,y+1,20,10);}],
+  municipios:['Municípios com quilombos (ITESP)',(c,x,y)=>{c.fillStyle='rgba(190,178,151,.6)';c.fillRect(x,y,22,12);c.strokeStyle='#232323';c.lineWidth=1;c.strokeRect(x,y,22,12);}],
+  ugrhi:['Limite da UGRHI 11 (SP Águas)',(c,x,y)=>{c.strokeStyle='#bfbfbf';c.lineWidth=3;c.strokeRect(x+1.5,y+1.5,19,9);}],
+  aquiferos:['Aquíferos (Serviço Geológico do Brasil)',null]
+};
+const AQN={'Classe 1s':'Litorâneo · classe 1s','Classe 2s':'Litorâneo · classe 2s','Classe 2f':'Pré-cambriano · classe 2f','Classe 3f':'Pré-cambriano · classe 3f','Classe 4f':'Pré-cambriano cárstico · classe 4f'};
+const FUNDO={sat:'Imagem de satélite: Esri, Maxar, Earthstar Geographics',ruas:'Mapa de vias: Esri, HERE, Garmin, © OpenStreetMap',topo:'Mapa topográfico: Esri, HERE, Garmin, © OpenStreetMap'};
+const carregaImg=src=>new Promise((ok,erro)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=erro;i.src=src;});
+function quebra(c,t,larg){const pal=t.split(' '),l=[];let a='';for(const p of pal){const n=a?a+' '+p:p;if(c.measureText(n).width>larg&&a){l.push(a);a=p;}else a=n;}if(a)l.push(a);return l;}
+async function montaMapa(){
+  const S=2,cont=map.getContainer(),mr=cont.getBoundingClientRect(),W=Math.round(mr.width),H=Math.round(mr.height),LW=330;
+  const cv=document.createElement('canvas');cv.width=(W+LW)*S;cv.height=H*S;const c=cv.getContext('2d');c.scale(S,S);
+  c.fillStyle='#dfe6e2';c.fillRect(0,0,W,H);
+  c.save();c.beginPath();c.rect(0,0,W,H);c.clip();
+  const panes=Object.values(map.getPanes()).filter(p=>p!==map.getPane('mapPane')&&p!==map.getPane('popupPane')&&p!==map.getPane('markerPane')&&p!==map.getPane('shadowPane'))
+    .sort((a,b)=>(+getComputedStyle(a).zIndex||0)-(+getComputedStyle(b).zIndex||0));
+  for(const p of panes){
+    if(p===map.getPane('tooltipPane')){ // nomes das comunidades
+      if(cont.classList.contains('nolabels'))continue;
+      c.font='700 12.5px "Source Sans 3","Segoe UI",sans-serif';c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
+      p.querySelectorAll('.lbl').forEach(t=>{const r=t.getBoundingClientRect(),x=r.left-mr.left+r.width/2,y=r.top-mr.top+r.height/2;if(x<0||y<0||x>W||y>H)return;
+        c.strokeStyle='rgba(0,0,0,.85)';c.lineWidth=3.5;c.strokeText(t.textContent,x,y);c.fillStyle='#fff';c.fillText(t.textContent,x,y);});
+      continue;}
+    for(const el of p.querySelectorAll('img.leaflet-tile-loaded,canvas,svg')){
+      if(el.closest('.leaflet-tile-container')&&getComputedStyle(el.closest('.leaflet-tile-container')).opacity==='0')continue;
+      const r=el.getBoundingClientRect();if(r.width===0||r.right<mr.left||r.left>mr.right||r.bottom<mr.top||r.top>mr.bottom)continue;
+      const x=r.left-mr.left,y=r.top-mr.top;
+      try{
+        if(el.tagName==='svg'){const cl=el.cloneNode(true);cl.setAttribute('xmlns','http://www.w3.org/2000/svg');cl.setAttribute('width',r.width);cl.setAttribute('height',r.height);cl.style.transform='';
+          const u=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(cl)],{type:'image/svg+xml'}));const im=await carregaImg(u);c.drawImage(im,x,y,r.width,r.height);URL.revokeObjectURL(u);}
+        else c.drawImage(el,x,y,r.width,r.height);
+      }catch(e){}
+    }}
+  // escala gráfica e norte
+  const y0=H/2,m1=map.containerPointToLatLng([20,y0]),m2=map.containerPointToLatLng([120,y0]),mpp=map.distance(m1,m2)/100;
+  const alvo=mpp*120,pot=Math.pow(10,Math.floor(Math.log10(alvo))),passo=[1,2,5,10].map(k=>k*pot).filter(v=>v<=alvo).pop(),px=passo/mpp;
+  const rot=passo>=1000?(passo/1000).toLocaleString('pt-BR')+' km':passo+' m';
+  c.fillStyle='rgba(255,255,255,.85)';c.fillRect(12,H-44,px+24,32);
+  c.fillStyle='#15231e';c.fillRect(24,H-22,px/2,5);c.strokeStyle='#15231e';c.lineWidth=1;c.strokeRect(24,H-22,px,5);
+  c.font='11px "Source Sans 3","Segoe UI",sans-serif';c.textAlign='left';c.textBaseline='alphabetic';c.fillText('0',21,H-27);c.textAlign='right';c.fillText(rot,24+px+6,H-27);
+  c.fillStyle='rgba(255,255,255,.85)';c.beginPath();c.arc(W-30,34,20,0,7);c.fill();
+  c.fillStyle='#15231e';c.beginPath();c.moveTo(W-30,18);c.lineTo(W-37,40);c.lineTo(W-30,35);c.lineTo(W-23,40);c.closePath();c.fill();
+  c.font='700 11px "Source Sans 3","Segoe UI",sans-serif';c.textAlign='center';c.fillText('N',W-30,51);
+  c.restore();
+  // legenda
+  const X=W,F='"Source Sans 3","Segoe UI",sans-serif';c.fillStyle='#ffffff';c.fillRect(X,0,LW,H);c.fillStyle='#d8e1dc';c.fillRect(X,0,1,H);
+  let y=28;const L0=X+20,larg=LW-40;c.textAlign='left';c.textBaseline='alphabetic';
+  c.fillStyle='#0f5c4a';c.font='500 10.5px "IBM Plex Mono",ui-monospace,monospace';c.fillText('PAINEL DE SANEAMENTO · UGRHI 11',L0,y);y+=24;
+  c.fillStyle='#15231e';c.font='700 18px '+F;for(const l of quebra(c,'Territórios quilombolas da UGRHI 11',larg)){c.fillText(l,L0,y);y+=22;}
+  c.fillStyle='#5a6b64';c.font='12.5px '+F;c.fillText('Vista gerada em '+new Date().toLocaleDateString('pt-BR'),L0,y);y+=26;
+  c.fillStyle='#0f5c4a';c.font='500 10.5px "IBM Plex Mono",ui-monospace,monospace';c.fillText('LEGENDA',L0,y);y+=16;
+  c.font='13px '+F;
+  for(const k of ['ucs','quilombos','hidrografia','subbacias','municipios','ugrhi','aquiferos']){
+    if(!map.hasLayer(layers[k]))continue;const [nome,des]=LEG[k];
+    if(des){des(c,L0,y-10);c.fillStyle='#15231e';const ls=quebra(c,nome,larg-32);ls.forEach((l,i)=>c.fillText(l,L0+32,y+i*16));y+=ls.length*16+8;}
+    else{c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
+      const vis=new Set(GEO.aquiferos.features.map(f=>f.properties.CLASSE));
+      for(const [cl,txt] of Object.entries(AQN)){if(!vis.has(cl))continue;c.fillStyle=AQ[cl];c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#5b5b5b';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
+  }
+  if(munSel){c.strokeStyle='#15231e';c.setLineDash([6,5]);c.lineWidth=2;c.beginPath();c.moveTo(L0,y-4);c.lineTo(L0+22,y-4);c.stroke();c.setLineDash([]);
+    const b=munList.querySelector('button.on');c.fillStyle='#15231e';c.fillText('Município em destaque: '+(b?b.firstChild.textContent.trim():''),L0+32,y);y+=24;}
+  y=Math.max(y+8,H-150);
+  c.fillStyle='#5a6b64';c.font='11.5px '+F;
+  const base=document.querySelector('.lyr input[name=bm]:checked').value;
+  const fontes=['Dados: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI 11), CETESB (hidrografia), Serviço Geológico do Brasil (aquíferos).',FUNDO[base]+'.','Coordenadas geográficas, WGS 84. Fonte: painelsaneamentoquilombola-rb.github.io/painel'];
+  for(const t of fontes){for(const l of quebra(c,t,larg)){c.fillText(l,L0,y);y+=15;}y+=4;}
+  return cv;}
+const dlMsg=document.getElementById('dlmsg');
+const nomeArq=ext=>'mapa_quilombos_ugrhi11_'+new Date().toISOString().slice(0,10)+'.'+ext;
+function baixa(blob,nome){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);}
+async function exporta(tipo){
+  dlMsg.textContent='Gerando…';
+  try{const cv=await montaMapa();
+    if(tipo==='png'){cv.toBlob(b=>{baixa(b,nomeArq('png'));dlMsg.textContent='Imagem baixada.';},'image/png');return;}
+    if(!window.jspdf){await new Promise((ok,erro)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';sc.onload=ok;sc.onerror=erro;document.head.appendChild(sc);});}
+    const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});const pw=297,ph=210,m=10,r=Math.min((pw-2*m)/cv.width,(ph-2*m)/cv.height);
+    pdf.addImage(cv.toDataURL('image/jpeg',.92),'JPEG',(pw-cv.width*r)/2,(ph-cv.height*r)/2,cv.width*r,cv.height*r);
+    baixa(pdf.output('blob'),nomeArq('pdf'));dlMsg.textContent='PDF baixado.';
+  }catch(e){dlMsg.textContent='Não foi possível gerar o arquivo. Tente de novo.';}
+}
+document.getElementById('dlPNG').onclick=()=>exporta('png');
+document.getElementById('dlPDF').onclick=()=>exporta('pdf');
 map.on('click',e=>{const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
   const rio=rioPerto(e.latlng);
   if(rio)h+=`<div class="k">Curso d'água (CETESB)</div><div class="v">${rio.properties.nome?nomeRio(rio.properties.nome):'Sem nome no cadastro'}</div>${rio.properties.classe?`<div class="s">Classe ${rio.properties.classe} de enquadramento (Decreto estadual 10.755/1977)</div>`:''}`;
