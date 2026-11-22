@@ -255,7 +255,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
       </div>
     </div>
   </section>
-  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), CETESB (hidrografia; rios com nome na UGRHI inteira e todos os cursos d'água em Barra do Turvo). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), CETESB (hidrografia completa; fora de Barra do Turvo, os cursos d'água sem nome aparecem ao aproximar o mapa). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
 
   <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
@@ -657,9 +657,11 @@ const GEO={};
 const ITESP_ID={'Cedro':'cedro','Reginaldo':'regi','Pedra Preta/Paraiso':'pppa','Pedra Preta/Paraíso':'pppa','Ribeirão Grande/Terra Seca':'rgts','Bairro Ilhas':'ilhas','Ilhas':'ilhas'};
 try{await Promise.all(['aquiferos','ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
 catch(e){document.getElementById('map').innerHTML='<p class="sub" style="padding:16px">Não foi possível carregar as camadas do mapa. O restante do painel segue funcionando.</p>';return;}
-// hidrografia: rios com nome na UGRHI 11 inteira + todos os cursos d'água em Barra do Turvo (2 km além da divisa)
+// hidrografia: rios com nome na UGRHI inteira e todos os cursos d'água de Barra do Turvo (+2 km) sempre;
+// o restante da UGRHI 11 vem por blocos (mapa/hid/) quando o mapa é aproximado (zoom 12 ou mais)
 GEO.hidrografia={type:'FeatureCollection',features:[]};
 try{for(const n of ['hidrografia','hidrografia_bt']){const r=await fetch('mapa/'+n+'.geojson');if(r.ok)GEO.hidrografia.features.push(...(await r.json()).features);}}catch(e){}
+let HIDIDX=[];try{const r=await fetch('mapa/hid/index.json');if(r.ok)HIDIDX=await r.json();}catch(e){}
 const map=L.map('map',{zoomControl:true}).setView([-24.85,-48.45],11);
 map.createPane('ruasPane');map.getPane('ruasPane').style.zIndex=470;map.getPane('ruasPane').style.pointerEvents='none';
 const E='https://server.arcgisonline.com/ArcGIS/rest/services/';
@@ -685,6 +687,14 @@ for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,toleranc
   if(k!=='municipios'&&k!=='aquiferos')layers[k].addTo(map);
   if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
     defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
+// detalhe da hidrografia fora de Barra do Turvo, por blocos, só com zoom >= 12 (evita baixar 11 MB de uma vez)
+const HID_Z=12,hidOn=new Set(),DET=[];
+const hidDet=L.geoJSON(null,{pane:'hidrografia',renderer:layers.hidrografia.options.renderer,interactive:false,style:style.hidrografia});
+function hidVis(){const ver=map.hasLayer(layers.hidrografia)&&map.getZoom()>=HID_Z;ver?map.addLayer(hidDet):map.removeLayer(hidDet);return ver;}
+async function hidLoad(){if(!hidVis())return;const v=map.getBounds().pad(.25);
+  for(const c of HIDIDX){if(hidOn.has(c.f))continue;const b=c.b;if(b[2]<v.getWest()||b[0]>v.getEast()||b[3]<v.getSouth()||b[1]>v.getNorth())continue;
+    hidOn.add(c.f);try{const r=await fetch('mapa/hid/'+c.f+'.geojson');if(!r.ok)throw 0;const g=await r.json();g.features.forEach(f=>{f._b=bbox(f.geometry);DET.push(f);});hidDet.addData(g);}catch(e){hidOn.delete(c.f);}}}
+map.on('moveend',hidLoad);
 const labels=L.layerGroup().addTo(map);
 GEO.quilombos.features.forEach(f=>{const c=L.geoJSON(f).getBounds().getCenter();
   L.tooltip({permanent:true,direction:'center',className:'lbl',interactive:false}).setLatLng(c).setContent(f.properties.comunidade).addTo(labels);});
@@ -698,6 +708,7 @@ document.getElementById('goBT').onclick=()=>map.flyToBounds(bt);
 document.getElementById('goUG').onclick=()=>map.flyToBounds(layers.ugrhi.getBounds());
 document.querySelectorAll('.lyr input[data-l]').forEach(cb=>cb.onchange=()=>{const l=layers[cb.dataset.l];cb.checked?map.addLayer(l):map.removeLayer(l);
   if(cb.dataset.l==='aquiferos')document.getElementById('aqleg').hidden=!cb.checked;
+  if(cb.dataset.l==='hidrografia')hidLoad();
   if(cb.dataset.l==='quilombos'){cb.checked?map.addLayer(labels):map.removeLayer(labels);}});
 document.getElementById('lb').onchange=updLabels;
 document.querySelectorAll('.lyr input[name=bm]').forEach(r=>r.onchange=()=>{for(const k in base)map.removeLayer(base[k]);base[r.value].addTo(map);if(base[r.value].bringToBack)base[r.value].bringToBack();});
@@ -722,10 +733,11 @@ const tit=t=>t.toLowerCase().replace(/(^|[\s-])([a-zà-ú])/g,(m,a,b)=>a+b.toUpp
 const nomeRio=n=>n.split('/').map(p=>{const m=/^([^,(]+),\s*([A-Z]+)\s*(D[AEO]S?)?\b/.exec(p.trim());return m&&TIPO[m[2]]?`${TIPO[m[2]]} ${m[3]?m[3].toLowerCase()+' ':''}${tit(m[1].trim())}`:tit(p.trim());}).join(' / ');
 const bbox=g=>{let a=[180,90,-180,-90];(g.type==='LineString'?[g.coordinates]:g.coordinates).forEach(l=>l.forEach(([x,y])=>{if(x<a[0])a[0]=x;if(y<a[1])a[1]=y;if(x>a[2])a[2]=x;if(y>a[3])a[3]=y;}));return a;};
 GEO.hidrografia.features.forEach(f=>f._b=bbox(f.geometry));
+hidLoad();
 function segDist(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;let t=l?((p.x-a.x)*dx+(p.y-a.y)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}
 function rioPerto(latlng){if(!map.hasLayer(layers.hidrografia))return null;const P=map.latLngToLayerPoint(latlng),tol=6;
   const c=map.layerPointToLatLng([P.x+tol,P.y+tol]),d=Math.abs(c.lng-latlng.lng),dl=Math.abs(c.lat-latlng.lat);let best=null,bd=tol;
-  for(const f of GEO.hidrografia.features){const b=f._b;if(latlng.lng<b[0]-d||latlng.lng>b[2]+d||latlng.lat<b[1]-dl||latlng.lat>b[3]+dl)continue;
+  for(const f of (map.hasLayer(hidDet)?GEO.hidrografia.features.concat(DET):GEO.hidrografia.features)){const b=f._b;if(latlng.lng<b[0]-d||latlng.lng>b[2]+d||latlng.lat<b[1]-dl||latlng.lat>b[3]+dl)continue;
     for(const l of (f.geometry.type==='LineString'?[f.geometry.coordinates]:f.geometry.coordinates)){let q=map.latLngToLayerPoint([l[0][1],l[0][0]]);
       for(let i=1;i<l.length;i++){const r=map.latLngToLayerPoint([l[i][1],l[i][0]]);const dd=segDist(P,q,r);if(dd<bd){bd=dd;best=f;}q=r;}}}
   return best;}
