@@ -234,6 +234,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
         <h4>Camadas</h4>
         <label><input type="checkbox" data-l="ucs" checked><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
         <label><input type="checkbox" data-l="quilombos" checked><span class="sw" style="background:#eb7300;border:1px solid #232323"></span>Territórios quilombolas</label>
+        <label><input type="checkbox" data-l="hidrografia" checked><span class="sw" style="border-top:2px solid #8c97e1;height:0;margin-top:1px"></span>UGRHI-11 - Hidrografia (CETESB)</label>
         <label><input type="checkbox" data-l="subbacias" checked><span class="sw" style="border:2px solid #3da2f9"></span>Sub-bacias</label>
         <label><input type="checkbox" data-l="municipios"><span class="sw" style="background:rgba(190,178,151,.6);border:1px solid #232323"></span>Municípios com quilombos</label>
         <label><input type="checkbox" data-l="ugrhi" checked><span class="sw" style="border:3px solid #bfbfbf"></span>Limite da UGRHI 11</label>
@@ -247,7 +248,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
       </div>
     </div>
   </section>
-  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), CETESB (hidrografia; rios com nome na UGRHI inteira e todos os cursos d'água em Barra do Turvo). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
 
   <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
@@ -649,6 +650,9 @@ const GEO={};
 const ITESP_ID={'Cedro':'cedro','Reginaldo':'regi','Pedra Preta/Paraiso':'pppa','Pedra Preta/Paraíso':'pppa','Ribeirão Grande/Terra Seca':'rgts','Bairro Ilhas':'ilhas','Ilhas':'ilhas'};
 try{await Promise.all(['ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
 catch(e){document.getElementById('map').innerHTML='<p class="sub" style="padding:16px">Não foi possível carregar as camadas do mapa. O restante do painel segue funcionando.</p>';return;}
+// hidrografia: rios com nome na UGRHI 11 inteira + todos os cursos d'água em Barra do Turvo (2 km além da divisa)
+GEO.hidrografia={type:'FeatureCollection',features:[]};
+try{for(const n of ['hidrografia','hidrografia_bt']){const r=await fetch('mapa/'+n+'.geojson');if(r.ok)GEO.hidrografia.features.push(...(await r.json()).features);}}catch(e){}
 const map=L.map('map',{zoomControl:true}).setView([-24.85,-48.45],11);
 map.createPane('ruasPane');map.getPane('ruasPane').style.zIndex=470;map.getPane('ruasPane').style.pointerEvents='none';
 const E='https://server.arcgisonline.com/ArcGIS/rest/services/';
@@ -660,16 +664,16 @@ const base={
   topo:L.tileLayer(E+'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'})
 };
 base.sat.addTo(map);
-map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas');
-const order=['ugrhi','municipios','subbacias','quilombos','ucs'];
+map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB');
+const order=['ugrhi','municipios','subbacias','hidrografia','quilombos','ucs'];
 order.forEach((p,i)=>{map.createPane(p);map.getPane(p).style.zIndex=400+i*10;map.getPane(p).style.pointerEvents='none';});
-map.createPane('selPane');map.getPane('selPane').style.zIndex=460;map.getPane('selPane').style.pointerEvents='none';
+map.createPane('selPane');map.getPane('selPane').style.zIndex=465;map.getPane('selPane').style.pointerEvents='none';
 const style={ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
-  subbacias:{color:'#3da2f9',weight:1,fill:false},quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.8},
+  subbacias:{color:'#3da2f9',weight:1,fill:false},hidrografia:f=>({color:'#8c97e1',weight:f.properties.nome?1.4:.8,opacity:.95}),quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.8},
   ucs:{color:'#4fc982',weight:1.6,fillColor:'url(#hatch)',fillOpacity:1}};
 const layers={};
-for(const k of order){const renderer=L.svg({pane:k});
-  layers[k]=L.geoJSON(GEO[k],{pane:k,renderer,interactive:false,style:()=>style[k]});
+for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,tolerance:0}):L.svg({pane:k}); // hidrografia em canvas: milhares de linhas, mais leve no celular
+  layers[k]=L.geoJSON(GEO[k],{pane:k,renderer,interactive:false,style:f=>typeof style[k]==='function'?style[k](f):style[k]});
   if(k!=='municipios')layers[k].addTo(map);
   if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
     defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
@@ -703,7 +707,22 @@ function inRing(pt,ring){let x=pt[0],y=pt[1],ins=false;for(let i=0,j=ring.length
   if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))ins=!ins;}return ins;}
 function inGeom(pt,g){const polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;return polys.some(p=>inRing(pt,p[0])&&!p.slice(1).some(h=>inRing(pt,h)));}
 const hit=(k,pt)=>map.hasLayer(layers[k])?GEO[k].features.filter(f=>inGeom(pt,f.geometry)):[];
+// cursos d'água: clique até 6 px da linha
+const TIPO={R:'Rio',RIO:'Rio',RIB:'Ribeirão',COR:'Córrego'};
+const tit=t=>t.toLowerCase().replace(/(^|[\s-])([a-zà-ú])/g,(m,a,b)=>a+b.toUpperCase()).replace(/\b(De|Da|Do|Das|Dos|E)\b/g,w=>w.toLowerCase());
+const nomeRio=n=>n.split('/').map(p=>{const m=/^([^,(]+),\s*([A-Z]+)\s*(D[AEO]S?)?\b/.exec(p.trim());return m&&TIPO[m[2]]?`${TIPO[m[2]]} ${m[3]?m[3].toLowerCase()+' ':''}${tit(m[1].trim())}`:tit(p.trim());}).join(' / ');
+const bbox=g=>{let a=[180,90,-180,-90];(g.type==='LineString'?[g.coordinates]:g.coordinates).forEach(l=>l.forEach(([x,y])=>{if(x<a[0])a[0]=x;if(y<a[1])a[1]=y;if(x>a[2])a[2]=x;if(y>a[3])a[3]=y;}));return a;};
+GEO.hidrografia.features.forEach(f=>f._b=bbox(f.geometry));
+function segDist(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;let t=l?((p.x-a.x)*dx+(p.y-a.y)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}
+function rioPerto(latlng){if(!map.hasLayer(layers.hidrografia))return null;const P=map.latLngToLayerPoint(latlng),tol=6;
+  const c=map.layerPointToLatLng([P.x+tol,P.y+tol]),d=Math.abs(c.lng-latlng.lng),dl=Math.abs(c.lat-latlng.lat);let best=null,bd=tol;
+  for(const f of GEO.hidrografia.features){const b=f._b;if(latlng.lng<b[0]-d||latlng.lng>b[2]+d||latlng.lat<b[1]-dl||latlng.lat>b[3]+dl)continue;
+    for(const l of (f.geometry.type==='LineString'?[f.geometry.coordinates]:f.geometry.coordinates)){let q=map.latLngToLayerPoint([l[0][1],l[0][0]]);
+      for(let i=1;i<l.length;i++){const r=map.latLngToLayerPoint([l[i][1],l[i][0]]);const dd=segDist(P,q,r);if(dd<bd){bd=dd;best=f;}q=r;}}}
+  return best;}
 map.on('click',e=>{const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
+  const rio=rioPerto(e.latlng);
+  if(rio)h+=`<div class="k">Curso d'água (CETESB)</div><div class="v">${rio.properties.nome?nomeRio(rio.properties.nome):'Sem nome no cadastro'}</div>${rio.properties.classe?`<div class="s">Classe ${rio.properties.classe} de enquadramento (Decreto estadual 10.755/1977)</div>`:''}`;
   hit('quilombos',pt).forEach(f=>{const id=ITESP_ID[f.properties.comunidade];const d=id&&data.find(x=>x.id===id);if(d)alvo=id;
     h+=`<div class="k">Território quilombola</div><div class="v">${f.properties.comunidade}</div><div class="s">${f.properties.municipio} · ${f.properties.situacao} (ITESP)</div>`;
     if(d)h+=`<div class="kv">${IND.slice(0,4).map(k=>`<div><span>${NOME[k]}</span>${pill(resumo(d.id,k).cls)}</div>`).join('')}
