@@ -744,7 +744,9 @@ window.mapSel=(id,fly)=>{if(selLayer)map.removeLayer(selLayer);
   const f=btF.find(x=>ITESP_ID[x.properties.comunidade]===id);if(!f)return;
   selLayer=L.geoJSON(f,{pane:'selPane',interactive:false,style:{color:'#ffe14d',weight:3.5,fill:false}}).addTo(map);
   if(fly)map.flyToBounds(selLayer.getBounds().pad(0.6),{maxZoom:13,duration:.6});};
-mapSel(sel,false);
+// destaque amarelo: só enquanto a comunidade está selecionada no mapa; some ao fechar a caixa ou clicar fora
+window.mapClear=()=>{if(selLayer){map.removeLayer(selLayer);selLayer=null;}};
+map.on('popupclose',()=>mapClear());
 // clique
 function inRing(pt,ring){let x=pt[0],y=pt[1],ins=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
   if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))ins=!ins;}return ins;}
@@ -852,7 +854,7 @@ async function exporta(tipo){
 }
 document.getElementById('dlPNG').onclick=()=>exporta('png');
 document.getElementById('dlPDF').onclick=()=>exporta('pdf');
-map.on('click',e=>{const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
+map.on('click',e=>{mapClear();const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
   const rio=rioPerto(e.latlng);
   if(rio)h+=`<div class="k">Curso d'água (CETESB)</div><div class="v">${rio.properties.nome?nomeRio(rio.properties.nome):'Sem nome no cadastro'}</div>${rio.properties.classe?`<div class="s">Classe ${rio.properties.classe} de enquadramento (Decreto estadual 10.755/1977)</div>`:''}`;
   hit('quilombos',pt).forEach(f=>{const id=ITESP_ID[f.properties.comunidade];const d=id&&data.find(x=>x.id===id);if(d)alvo=id;
