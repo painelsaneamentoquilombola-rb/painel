@@ -175,6 +175,12 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .lyr input{accent-color:#0f5c4a;margin:0}
 .lyr .sw{width:20px;height:11px;border-radius:2px;flex:none}
 .aqleg{display:grid;gap:2px;margin:0 0 4px 27px;font-size:11.5px;color:#5a6b64}.aqleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.25)}
+.mun-tg{font:inherit;font-size:12px;color:#0f5c4a;background:none;border:0;padding:0 0 2px 27px;cursor:pointer;text-align:left}
+.mun-tg:hover{text-decoration:underline}
+.munlist{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin:0 0 4px 27px}
+.munlist button{font:inherit;font-size:12px;color:#15231e;background:#f3f6f4;border:1px solid #d8e1dc;border-radius:5px;padding:3px 6px;cursor:pointer;text-align:left;line-height:1.25}
+.munlist button:hover,.munlist button.on{border-color:#0f5c4a;color:#0f5c4a}
+.munlist small{color:#5a6b64}
 .lyr hr{border:0;border-top:1px solid #d8e1dc;margin:6px 0}
 .lyr .tg{display:none;width:100%;text-align:left;font-size:13px;padding:4px 8px}
 .lyr button.go{font-size:12.5px;padding:4px 8px;margin:2px 4px 2px 0;background:#f3f6f4;color:#15231e;border-color:#d8e1dc}
@@ -238,6 +244,8 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
         <label><input type="checkbox" data-l="hidrografia" checked><span class="sw" style="border-top:2px solid #8c97e1;height:0;margin-top:1px"></span>UGRHI-11 - Hidrografia (CETESB)</label>
         <label><input type="checkbox" data-l="subbacias" checked><span class="sw" style="border:2px solid #3da2f9"></span>Sub-bacias</label>
         <label><input type="checkbox" data-l="municipios"><span class="sw" style="background:rgba(190,178,151,.6);border:1px solid #232323"></span>Municípios com quilombos</label>
+        <button type="button" class="mun-tg" id="mun-tg" aria-expanded="false">Ir para um município ▾</button>
+        <div class="munlist" id="munlist" hidden></div>
         <label><input type="checkbox" data-l="ugrhi" checked><span class="sw" style="border:3px solid #bfbfbf"></span>Limite da UGRHI 11</label>
         <label><input type="checkbox" data-l="aquiferos"><span class="sw" style="background:linear-gradient(90deg,#f3d77a 0 20%,#d9a93f 20% 40%,#c7a6dc 40% 60%,#8f6bb8 60% 80%,#5fb3a3 80%);border:1px solid #6b6b6b"></span>Aquíferos (Serviço Geológico do Brasil)</label>
         <div class="aqleg" id="aqleg" hidden>
@@ -695,6 +703,18 @@ async function hidLoad(){if(!hidVis())return;const v=map.getBounds().pad(.1);
   for(const c of HIDIDX){if(hidOn.has(c.f))continue;const b=c.b;if(b[2]<v.getWest()||b[0]>v.getEast()||b[3]<v.getSouth()||b[1]>v.getNorth())continue;
     hidOn.add(c.f);try{const r=await fetch('mapa/hid/'+c.f+'.geojson');if(!r.ok)throw 0;const g=await r.json();g.features.forEach(f=>{f._b=bbox(f.geometry);DET.push(f);});hidDet.addData(g);}catch(e){hidOn.delete(c.f);}}}
 map.on('moveend',hidLoad);
+// lista de municípios com quilombos: clique leva o mapa até o município e destaca o limite
+const NOME_MUN={'Itaoca':'Itaóca'};let munSel=null;
+const munList=document.getElementById('munlist'),munTg=document.getElementById('mun-tg');
+munTg.onclick=()=>{const ab=munList.hidden;munList.hidden=!ab;munTg.setAttribute('aria-expanded',ab);munTg.textContent=ab?'Ir para um município ▴':'Ir para um município ▾';};
+GEO.municipios.features.slice().sort((a,b)=>a.properties.municipio.localeCompare(b.properties.municipio,'pt')).forEach(f=>{
+  const n=NOME_MUN[f.properties.municipio]||f.properties.municipio,q=f.properties.quilombos,bt=document.createElement('button');bt.type='button';
+  bt.innerHTML=`${n} <small>(${q})</small>`;bt.title=`${n}: ${q} território${q>1?'s':''} quilombola${q>1?'s':''} (ITESP)`;
+  bt.onclick=()=>{if(munSel)map.removeLayer(munSel);munList.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===bt));
+    munSel=L.geoJSON(f,{pane:'selPane',interactive:false,style:{color:'#ffffff',weight:3,dashArray:'6 5',fill:false}}).addTo(map);
+    map.flyToBounds(munSel.getBounds(),{padding:[30,30],duration:.8});
+    if(matchMedia('(max-width:640px)').matches)document.getElementById('lyr').classList.add('closed');};
+  munList.appendChild(bt);});
 const labels=L.layerGroup().addTo(map);
 GEO.quilombos.features.forEach(f=>{const c=L.geoJSON(f).getBounds().getCenter();
   L.tooltip({permanent:true,direction:'center',className:'lbl',interactive:false}).setLatLng(c).setContent(f.properties.comunidade).addTo(labels);});
