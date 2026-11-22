@@ -174,6 +174,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .lyr label{display:flex;align-items:center;gap:7px;padding:2px 0;cursor:pointer}
 .lyr input{accent-color:#0f5c4a;margin:0}
 .lyr .sw{width:20px;height:11px;border-radius:2px;flex:none}
+.aqleg{display:grid;gap:2px;margin:0 0 4px 27px;font-size:11.5px;color:#5a6b64}.aqleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.25)}
 .lyr hr{border:0;border-top:1px solid #d8e1dc;margin:6px 0}
 .lyr .tg{display:none;width:100%;text-align:left;font-size:13px;padding:4px 8px}
 .lyr button.go{font-size:12.5px;padding:4px 8px;margin:2px 4px 2px 0;background:#f3f6f4;color:#15231e;border-color:#d8e1dc}
@@ -238,6 +239,12 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
         <label><input type="checkbox" data-l="subbacias" checked><span class="sw" style="border:2px solid #3da2f9"></span>Sub-bacias</label>
         <label><input type="checkbox" data-l="municipios"><span class="sw" style="background:rgba(190,178,151,.6);border:1px solid #232323"></span>Municípios com quilombos</label>
         <label><input type="checkbox" data-l="ugrhi" checked><span class="sw" style="border:3px solid #bfbfbf"></span>Limite da UGRHI 11</label>
+        <label><input type="checkbox" data-l="aquiferos"><span class="sw" style="background:linear-gradient(90deg,#f3d77a 0 20%,#d9a93f 20% 40%,#c7a6dc 40% 60%,#8f6bb8 60% 80%,#5fb3a3 80%);border:1px solid #6b6b6b"></span>Aquíferos (Serviço Geológico do Brasil)</label>
+        <div class="aqleg" id="aqleg" hidden>
+          <span><i style="background:#f3d77a"></i>Litorâneo · classe 1s</span><span><i style="background:#d9a93f"></i>Litorâneo · classe 2s</span>
+          <span><i style="background:#c7a6dc"></i>Pré-cambriano · classe 2f</span><span><i style="background:#8f6bb8"></i>Pré-cambriano · classe 3f</span>
+          <span><i style="background:#5fb3a3"></i>Pré-cambriano cárstico · classe 4f</span>
+        </div>
         <label><input type="checkbox" id="lb" checked><span class="sw"></span>Nomes das comunidades</label>
         <hr><h4>Mapa de fundo</h4>
         <label><input type="radio" name="bm" value="sat" checked>Satélite</label>
@@ -248,7 +255,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
       </div>
     </div>
   </section>
-  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), CETESB (hidrografia; rios com nome na UGRHI inteira e todos os cursos d'água em Barra do Turvo). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), CETESB (hidrografia; rios com nome na UGRHI inteira e todos os cursos d'água em Barra do Turvo). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
 
   <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
@@ -648,7 +655,7 @@ kpis();grid();detail();
 const L=window.L; // Leaflet (o painel já usa o nome L para os rótulos das classes)
 const GEO={};
 const ITESP_ID={'Cedro':'cedro','Reginaldo':'regi','Pedra Preta/Paraiso':'pppa','Pedra Preta/Paraíso':'pppa','Ribeirão Grande/Terra Seca':'rgts','Bairro Ilhas':'ilhas','Ilhas':'ilhas'};
-try{await Promise.all(['ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
+try{await Promise.all(['aquiferos','ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
 catch(e){document.getElementById('map').innerHTML='<p class="sub" style="padding:16px">Não foi possível carregar as camadas do mapa. O restante do painel segue funcionando.</p>';return;}
 // hidrografia: rios com nome na UGRHI 11 inteira + todos os cursos d'água em Barra do Turvo (2 km além da divisa)
 GEO.hidrografia={type:'FeatureCollection',features:[]};
@@ -664,17 +671,18 @@ const base={
   topo:L.tileLayer(E+'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'})
 };
 base.sat.addTo(map);
-map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB');
-const order=['ugrhi','municipios','subbacias','hidrografia','quilombos','ucs'];
+map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB, SGB');
+const order=['aquiferos','ugrhi','municipios','subbacias','hidrografia','quilombos','ucs'];
 order.forEach((p,i)=>{map.createPane(p);map.getPane(p).style.zIndex=400+i*10;map.getPane(p).style.pointerEvents='none';});
 map.createPane('selPane');map.getPane('selPane').style.zIndex=465;map.getPane('selPane').style.pointerEvents='none';
-const style={ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
+const AQ={'Classe 1s':'#f3d77a','Classe 2s':'#d9a93f','Classe 2f':'#c7a6dc','Classe 3f':'#8f6bb8','Classe 4f':'#5fb3a3'};
+const style={aquiferos:f=>({color:'#5b5b5b',weight:.6,fillColor:AQ[f.properties.CLASSE]||'#cccccc',fillOpacity:.6}),ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
   subbacias:{color:'#3da2f9',weight:1,fill:false},hidrografia:f=>({color:'#8c97e1',weight:f.properties.nome?1.4:.8,opacity:.95}),quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.8},
   ucs:{color:'#4fc982',weight:1.6,fillColor:'url(#hatch)',fillOpacity:1}};
 const layers={};
 for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,tolerance:0}):L.svg({pane:k}); // hidrografia em canvas: milhares de linhas, mais leve no celular
   layers[k]=L.geoJSON(GEO[k],{pane:k,renderer,interactive:false,style:f=>typeof style[k]==='function'?style[k](f):style[k]});
-  if(k!=='municipios')layers[k].addTo(map);
+  if(k!=='municipios'&&k!=='aquiferos')layers[k].addTo(map);
   if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
     defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
 const labels=L.layerGroup().addTo(map);
@@ -689,6 +697,7 @@ map.fitBounds(bt);updLabels();
 document.getElementById('goBT').onclick=()=>map.flyToBounds(bt);
 document.getElementById('goUG').onclick=()=>map.flyToBounds(layers.ugrhi.getBounds());
 document.querySelectorAll('.lyr input[data-l]').forEach(cb=>cb.onchange=()=>{const l=layers[cb.dataset.l];cb.checked?map.addLayer(l):map.removeLayer(l);
+  if(cb.dataset.l==='aquiferos')document.getElementById('aqleg').hidden=!cb.checked;
   if(cb.dataset.l==='quilombos'){cb.checked?map.addLayer(labels):map.removeLayer(labels);}});
 document.getElementById('lb').onchange=updLabels;
 document.querySelectorAll('.lyr input[name=bm]').forEach(r=>r.onchange=()=>{for(const k in base)map.removeLayer(base[k]);base[r.value].addTo(map);if(base[r.value].bringToBack)base[r.value].bringToBack();});
@@ -732,6 +741,7 @@ map.on('click',e=>{const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
   hit('ucs',pt).forEach(f=>h+=`<div class="k">Unidade de conservação</div><div class="v">${f.properties.Unidade}</div><div class="s">${f.properties.OrgaoGesto||''}</div>`);
   hit('subbacias',pt).forEach(f=>h+=`<div class="k">Sub-bacia</div><div class="v">${f.properties.DSUBBC}</div>`);
   hit('municipios',pt).forEach(f=>h+=`<div class="k">Município</div><div class="v">${f.properties.municipio}</div>`);
+  hit('aquiferos',pt).forEach(f=>{const a=f.properties;h+=`<div class="k">Aquífero (SGB)</div><div class="v">${a.NOME_AQUI} (${a.SIGLA_AQUI}) · ${a.CLASSE.replace('Classe','classe')}</div><div class="s">Vazão provável por poço: ${a.VAZAO} m³/h<br>${a.TIPO_CARAC}<br>Rocha principal: ${a.ROCHA_PRIN}</div>`;});
   if(!h)h='<div class="s">Fora das camadas ligadas.</div>';
   L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pp">${h}</div>`).openOn(map);
   if(alvo)mapSel(alvo,false);});
