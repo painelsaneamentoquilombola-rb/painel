@@ -258,7 +258,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
         <div class="aqleg" id="idhleg" hidden>
           <span><i style="background:#1f6657"></i>0,730 a 0,759 · alto</span><span><i style="background:#4e9f8d"></i>0,700 a 0,729 · alto</span>
           <span><i style="background:#94cfc0"></i>0,670 a 0,699 · médio</span><span><i style="background:#d4ece6"></i>0,640 a 0,669 · médio</span>
-          <span style="margin-top:2px">23 municípios da UGRHI 11 · Brasil: 0,727</span>
+          <span style="margin-top:2px">Parte de cada município dentro da UGRHI 11 · Brasil: 0,727</span>
         </div>
         <label><input type="checkbox" id="lb" checked><span class="sw"></span>Nomes das comunidades</label>
         <hr><h4>Mapa de fundo</h4>
@@ -878,7 +878,7 @@ map.on('click',e=>{mapClear();const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo
   hit('ucs',pt).forEach(f=>h+=`<div class="k">Unidade de conservação</div><div class="v">${f.properties.Unidade}</div><div class="s">${f.properties.OrgaoGesto||''}</div>`);
   hit('subbacias',pt).forEach(f=>h+=`<div class="k">Sub-bacia</div><div class="v">${f.properties.DSUBBC}</div>`);
   hit('municipios',pt).forEach(f=>h+=`<div class="k">Município</div><div class="v">${f.properties.municipio}</div>`);
-  hit('idhm',pt).forEach(f=>{const a=f.properties,fm=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:3});h+=`<div class="k">IDHM 2010 (Atlas Brasil)</div><div class="v">${a.municipio}: ${fm(a.idhm)} · ${a.faixa}</div><div class="s">${a.rank}º entre os 23 municípios da UGRHI 11 · Brasil: 0,727</div>`;});
+  hit('idhm',pt).forEach(f=>{const a=f.properties,fm=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:3});h+=`<div class="k">IDHM 2010 (Atlas Brasil)</div><div class="v">${a.municipio}: ${fm(a.idhm)} · ${a.faixa}</div><div class="s">${a.cbh?a.rank+'º entre os 23 municípios do CBH-RB':'Sede fora da UGRHI 11; não integra o CBH-RB'} · Brasil: 0,727</div>`;});
   hit('aquiferos',pt).forEach(f=>{const a=f.properties;h+=`<div class="k">Aquífero (SGB)</div><div class="v">${a.NOME_AQUI} (${a.SIGLA_AQUI}) · ${a.CLASSE.replace('Classe','classe')}</div><div class="s">Vazão provável por poço: ${a.VAZAO} m³/h<br>${a.TIPO_CARAC}<br>Rocha principal: ${a.ROCHA_PRIN}</div>`;});
   if(!h)h='<div class="s">Fora das camadas ligadas.</div>';
   L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pp">${h}</div>`).openOn(map);
