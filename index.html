@@ -254,6 +254,12 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
           <span><i style="background:#c7a6dc"></i>Pré-cambriano · classe 2f</span><span><i style="background:#8f6bb8"></i>Pré-cambriano · classe 3f</span>
           <span><i style="background:#5fb3a3"></i>Pré-cambriano cárstico · classe 4f</span>
         </div>
+        <label><input type="checkbox" data-l="idhm"><span class="sw" style="background:linear-gradient(90deg,#d4ece6 0 25%,#94cfc0 25% 50%,#4e9f8d 50% 75%,#1f6657 75%);border:1px solid #6b6b6b"></span>IDHM 2010 dos municípios</label>
+        <div class="aqleg" id="idhleg" hidden>
+          <span><i style="background:#1f6657"></i>0,730 a 0,759 · alto</span><span><i style="background:#4e9f8d"></i>0,700 a 0,729 · alto</span>
+          <span><i style="background:#94cfc0"></i>0,670 a 0,699 · médio</span><span><i style="background:#d4ece6"></i>0,640 a 0,669 · médio</span>
+          <span style="margin-top:2px">23 municípios da UGRHI 11 · Brasil: 0,727</span>
+        </div>
         <label><input type="checkbox" id="lb" checked><span class="sw"></span>Nomes das comunidades</label>
         <hr><h4>Mapa de fundo</h4>
         <label><input type="radio" name="bm" value="sat" checked>Satélite</label>
@@ -265,7 +271,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
       </div>
     </div>
   </section>
-  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), CETESB (hidrografia; de longe aparecem só os rios com nome, e ao aproximar o mapa aparecem todos os cursos d'água). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010, último ano com dado por município) e IBGE (limites municipais), CETESB (hidrografia; de longe aparecem só os rios com nome, e ao aproximar o mapa aparecem todos os cursos d'água). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
 
   <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
@@ -665,7 +671,7 @@ kpis();grid();detail();
 const L=window.L; // Leaflet (o painel já usa o nome L para os rótulos das classes)
 const GEO={};
 const ITESP_ID={'Cedro':'cedro','Reginaldo':'regi','Pedra Preta/Paraiso':'pppa','Pedra Preta/Paraíso':'pppa','Ribeirão Grande/Terra Seca':'rgts','Bairro Ilhas':'ilhas','Ilhas':'ilhas'};
-try{await Promise.all(['aquiferos','ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
+try{await Promise.all(['aquiferos','idhm','ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
 catch(e){document.getElementById('map').innerHTML='<p class="sub" style="padding:16px">Não foi possível carregar as camadas do mapa. O restante do painel segue funcionando.</p>';return;}
 // hidrografia, igual em toda a UGRHI 11: de longe, só os rios com nome; a partir do zoom 10, todos os cursos d'água.
 // Os trechos sem nome vêm dos blocos da pasta mapa/hid/ (bt.geojson cobre Barra do Turvo), só na área visível.
@@ -683,18 +689,19 @@ const base={
   topo:L.tileLayer(E+'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,crossOrigin:true,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'})
 };
 base.sat.addTo(map);
-map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB, SGB');
-const order=['aquiferos','ugrhi','municipios','subbacias','hidrografia','quilombos','ucs'];
+map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB, SGB, Atlas Brasil, IBGE');
+const order=['aquiferos','idhm','ugrhi','municipios','subbacias','hidrografia','quilombos','ucs'];
 order.forEach((p,i)=>{map.createPane(p);map.getPane(p).style.zIndex=400+i*10;map.getPane(p).style.pointerEvents='none';});
 map.createPane('selPane');map.getPane('selPane').style.zIndex=465;map.getPane('selPane').style.pointerEvents='none';
 const AQ={'Classe 1s':'#f3d77a','Classe 2s':'#d9a93f','Classe 2f':'#c7a6dc','Classe 3f':'#8f6bb8','Classe 4f':'#5fb3a3'};
-const style={aquiferos:f=>({color:'#5b5b5b',weight:.6,fillColor:AQ[f.properties.CLASSE]||'#cccccc',fillOpacity:.6}),ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
+const IDHC=v=>v>=.73?'#1f6657':v>=.70?'#4e9f8d':v>=.67?'#94cfc0':'#d4ece6';
+const style={idhm:f=>({color:'#3d5e57',weight:.8,fillColor:IDHC(f.properties.idhm),fillOpacity:.75}),aquiferos:f=>({color:'#5b5b5b',weight:.6,fillColor:AQ[f.properties.CLASSE]||'#cccccc',fillOpacity:.6}),ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
   subbacias:{color:'#3da2f9',weight:1,fill:false},hidrografia:f=>({color:'#8c97e1',weight:f.properties.nome?1.4:.8,opacity:.95}),quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.8},
   ucs:{color:'#4fc982',weight:1.6,fillColor:'url(#hatch)',fillOpacity:1}};
 const layers={};
 for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,tolerance:0}):L.svg({pane:k}); // hidrografia em canvas: milhares de linhas, mais leve no celular
   layers[k]=L.geoJSON(GEO[k],{pane:k,renderer,interactive:false,style:f=>typeof style[k]==='function'?style[k](f):style[k]});
-  if(k!=='municipios'&&k!=='aquiferos')layers[k].addTo(map);
+  if(k!=='municipios'&&k!=='aquiferos'&&k!=='idhm')layers[k].addTo(map);
   if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
     defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
 // cursos d'água sem nome: só com zoom >= 10 e só na área visível (evita baixar 12 MB de uma vez)
@@ -731,6 +738,7 @@ document.getElementById('goBT').onclick=()=>map.flyToBounds(bt);
 document.getElementById('goUG').onclick=()=>map.flyToBounds(layers.ugrhi.getBounds());
 document.querySelectorAll('.lyr input[data-l]').forEach(cb=>cb.onchange=()=>{const l=layers[cb.dataset.l];cb.checked?map.addLayer(l):map.removeLayer(l);
   if(cb.dataset.l==='aquiferos')document.getElementById('aqleg').hidden=!cb.checked;
+  if(cb.dataset.l==='idhm')document.getElementById('idhleg').hidden=!cb.checked;
   if(cb.dataset.l==='hidrografia')hidLoad();
   if(cb.dataset.l==='quilombos'){cb.checked?map.addLayer(labels):map.removeLayer(labels);}});
 document.getElementById('lb').onchange=updLabels;
@@ -775,7 +783,8 @@ const LEG={
   subbacias:['Sub-bacias (DataGEO)',(c,x,y)=>{c.strokeStyle='#3da2f9';c.lineWidth=2;c.strokeRect(x+1,y+1,20,10);}],
   municipios:['Municípios com quilombos (ITESP)',(c,x,y)=>{c.fillStyle='rgba(190,178,151,.6)';c.fillRect(x,y,22,12);c.strokeStyle='#232323';c.lineWidth=1;c.strokeRect(x,y,22,12);}],
   ugrhi:['Limite da UGRHI 11 (SP Águas)',(c,x,y)=>{c.strokeStyle='#bfbfbf';c.lineWidth=3;c.strokeRect(x+1.5,y+1.5,19,9);}],
-  aquiferos:['Aquíferos (Serviço Geológico do Brasil)',null]
+  aquiferos:['Aquíferos (Serviço Geológico do Brasil)',null],
+  idhm:['IDHM 2010 dos municípios (Atlas Brasil)',null]
 };
 const AQN={'Classe 1s':'Litorâneo · classe 1s','Classe 2s':'Litorâneo · classe 2s','Classe 2f':'Pré-cambriano · classe 2f','Classe 3f':'Pré-cambriano · classe 3f','Classe 4f':'Pré-cambriano cárstico · classe 4f'};
 const FUNDO={sat:'Imagem de satélite: Esri, Maxar, Earthstar Geographics',ruas:'Mapa de vias: Esri, HERE, Garmin, © OpenStreetMap',topo:'Mapa topográfico: Esri, HERE, Garmin, © OpenStreetMap'};
@@ -824,9 +833,12 @@ async function montaMapa(){
   c.fillStyle='#5a6b64';c.font='12.5px '+F;c.fillText('Vista gerada em '+new Date().toLocaleDateString('pt-BR'),L0,y);y+=26;
   c.fillStyle='#0f5c4a';c.font='500 10.5px "IBM Plex Mono",ui-monospace,monospace';c.fillText('LEGENDA',L0,y);y+=16;
   c.font='13px '+F;
-  for(const k of ['ucs','quilombos','hidrografia','subbacias','municipios','ugrhi','aquiferos']){
+  for(const k of ['ucs','quilombos','hidrografia','subbacias','municipios','ugrhi','aquiferos','idhm']){
     if(!map.hasLayer(layers[k]))continue;const [nome,des]=LEG[k];
     if(des){des(c,L0,y-10);c.fillStyle='#15231e';const ls=quebra(c,nome,larg-32);ls.forEach((l,i)=>c.fillText(l,L0+32,y+i*16));y+=ls.length*16+8;}
+    else if(k==='idhm'){c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
+      for(const [cor,txt] of [['#1f6657','0,730 a 0,759 · alto'],['#4e9f8d','0,700 a 0,729 · alto'],['#94cfc0','0,670 a 0,699 · médio'],['#d4ece6','0,640 a 0,669 · médio']]){c.fillStyle=cor;c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#3d5e57';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}
+      c.fillStyle='#5a6b64';c.fillText('Brasil: 0,727',L0+8,y);y+=21;}
     else{c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
       const vis=new Set(GEO.aquiferos.features.map(f=>f.properties.CLASSE));
       for(const [cl,txt] of Object.entries(AQN)){if(!vis.has(cl))continue;c.fillStyle=AQ[cl];c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#5b5b5b';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
@@ -836,7 +848,7 @@ async function montaMapa(){
   y=Math.max(y+8,H-150);
   c.fillStyle='#5a6b64';c.font='11.5px '+F;
   const base=document.querySelector('.lyr input[name=bm]:checked').value;
-  const fontes=['Dados: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI 11), CETESB (hidrografia), Serviço Geológico do Brasil (aquíferos).',FUNDO[base]+'.','Coordenadas geográficas, WGS 84. Fonte: painelsaneamentoquilombola-rb.github.io/painel'];
+  const fontes=['Dados: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI 11), CETESB (hidrografia), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010) e IBGE (limites municipais).',FUNDO[base]+'.','Coordenadas geográficas, WGS 84. Fonte: painelsaneamentoquilombola-rb.github.io/painel'];
   for(const t of fontes){for(const l of quebra(c,t,larg)){c.fillText(l,L0,y);y+=15;}y+=4;}
   return cv;}
 const dlMsg=document.getElementById('dlmsg');
@@ -866,6 +878,7 @@ map.on('click',e=>{mapClear();const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo
   hit('ucs',pt).forEach(f=>h+=`<div class="k">Unidade de conservação</div><div class="v">${f.properties.Unidade}</div><div class="s">${f.properties.OrgaoGesto||''}</div>`);
   hit('subbacias',pt).forEach(f=>h+=`<div class="k">Sub-bacia</div><div class="v">${f.properties.DSUBBC}</div>`);
   hit('municipios',pt).forEach(f=>h+=`<div class="k">Município</div><div class="v">${f.properties.municipio}</div>`);
+  hit('idhm',pt).forEach(f=>{const a=f.properties,fm=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:3});h+=`<div class="k">IDHM 2010 (Atlas Brasil)</div><div class="v">${a.municipio}: ${fm(a.idhm)} · ${a.faixa}</div><div class="s">${a.rank}º entre os 23 municípios da UGRHI 11 · Brasil: 0,727</div>`;});
   hit('aquiferos',pt).forEach(f=>{const a=f.properties;h+=`<div class="k">Aquífero (SGB)</div><div class="v">${a.NOME_AQUI} (${a.SIGLA_AQUI}) · ${a.CLASSE.replace('Classe','classe')}</div><div class="s">Vazão provável por poço: ${a.VAZAO} m³/h<br>${a.TIPO_CARAC}<br>Rocha principal: ${a.ROCHA_PRIN}</div>`;});
   if(!h)h='<div class="s">Fora das camadas ligadas.</div>';
   L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pp">${h}</div>`).openOn(map);
