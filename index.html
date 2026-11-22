@@ -414,7 +414,7 @@ const PEND={
  esgoto:"Comunidade reconhecida depois do Censo 2022. Próximo passo: vistoria de campo.",
  lixo:"Comunidade reconhecida depois do Censo 2022. Próximo passo: vistoria de campo.",
  drenagem:"O Censo 2022 não investiga drenagem nos territórios quilombolas. Próximo passo: vistoria de campo.",
- sabesp:"Aguardando consulta à URAE-1 e à ARSESP via Lei de Acesso à Informação."
+ sabesp:"Pedido enviado à ARSESP pela Lei de Acesso à Informação em 22/11/2026 (protocolo 2026112216102859); resposta prevista até 12/12, prorrogável até 22/12."
 };
 
 function iniciar(){
@@ -488,7 +488,7 @@ function detail(){
       <div style="overflow-x:auto"><table class="mini"><thead><tr><th>Critério</th><th>Água atendida</th><th>Esgoto atendido</th></tr></thead>
       <tbody>${rows.map(r=>`<tr${r[0]==="PNSR"?' class="ref"':""}><td>${r[0]}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td></tr>`).join("")}</tbody></table></div></div>`;
   }
-  const st=[["Dados do Censo 2022 por território compilados",!!d.dom],["Famílias e área conferidas com o ITESP",true],["Metas e critérios do contrato analisados",true],["Consulta à URAE-1 e à ARSESP (LAI)",false],["Validação da área pela Prefeitura",false],["Vistoria de campo com a comunidade",false],["Consulta ao SISAGUA: sem amostras na comunidade",true]];
+  const st=[["Dados do Censo 2022 por território compilados",!!d.dom],["Famílias e área conferidas com o ITESP",true],["Metas e critérios do contrato analisados",true],["Pedido à ARSESP pela LAI enviado em 22/11/2026, aguardando resposta",false],["Validação da área pela Prefeitura",false],["Vistoria de campo com a comunidade",false],["Consulta ao SISAGUA: sem amostras na comunidade",true]];
   document.getElementById("detail").innerHTML=`
    <div><div class="eyebrow">Ficha da comunidade</div><h2>${d.nome}</h2></div>
    ${chips}
