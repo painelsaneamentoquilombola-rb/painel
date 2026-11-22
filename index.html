@@ -169,7 +169,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 #map{position:absolute;inset:0;border-radius:10px;background:var(--nd-bg)}
 .mapa .detail{max-height:none}
 .mhead{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
-.lyr{position:absolute;right:10px;top:10px;z-index:1000;width:250px;background:#fff;color:#15231e;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);padding:10px 12px;font-size:13px}
+.lyr{position:absolute;right:10px;top:10px;z-index:1000;width:250px;background:rgba(255,255,255,.88);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);color:#15231e;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);padding:10px 12px;font-size:13px}
 .lyr h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#0f5c4a;margin:4px 0 4px;text-transform:uppercase;font-weight:500}
 .lyr label{display:flex;align-items:center;gap:7px;padding:2px 0;cursor:pointer}
 .lyr input{accent-color:#0f5c4a;margin:0}
@@ -178,7 +178,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .mun-tg{font:inherit;font-size:12px;color:#0f5c4a;background:none;border:0;padding:0 0 2px 27px;cursor:pointer;text-align:left}
 .mun-tg:hover{text-decoration:underline}
 .munlist{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;margin:0 0 4px 27px}
-.munlist button{font:inherit;font-size:12px;color:#15231e;background:#f3f6f4;border:1px solid #d8e1dc;border-radius:5px;padding:3px 6px;cursor:pointer;text-align:left;line-height:1.25}
+.munlist button{font:inherit;font-size:12px;color:#15231e;background:rgba(243,246,244,.7);border:1px solid #d8e1dc;border-radius:5px;padding:3px 6px;cursor:pointer;text-align:left;line-height:1.25}
 .munlist button:hover,.munlist button.on{border-color:#0f5c4a;color:#0f5c4a}
 .munlist small{color:#5a6b64}
 .lyr hr{border:0;border-top:1px solid #d8e1dc;margin:6px 0}
@@ -706,11 +706,12 @@ map.on('moveend',hidLoad);
 // lista de municípios com quilombos: clique leva o mapa até o município e destaca o limite
 const NOME_MUN={'Itaoca':'Itaóca'};let munSel=null;
 const munList=document.getElementById('munlist'),munTg=document.getElementById('mun-tg');
-munTg.onclick=()=>{const ab=munList.hidden;munList.hidden=!ab;munTg.setAttribute('aria-expanded',ab);munTg.textContent=ab?'Ir para um município ▴':'Ir para um município ▾';};
+const munLimpa=()=>{if(munSel){map.removeLayer(munSel);munSel=null;}munList.querySelectorAll('button').forEach(x=>x.classList.remove('on'));};
+munTg.onclick=()=>{const ab=munList.hidden;if(!ab)munLimpa();munList.hidden=!ab;munTg.setAttribute('aria-expanded',ab);munTg.textContent=ab?'Ir para um município ▴':'Ir para um município ▾';};
 GEO.municipios.features.slice().sort((a,b)=>a.properties.municipio.localeCompare(b.properties.municipio,'pt')).forEach(f=>{
   const n=NOME_MUN[f.properties.municipio]||f.properties.municipio,q=f.properties.quilombos,bt=document.createElement('button');bt.type='button';
   bt.innerHTML=`${n} <small>(${q})</small>`;bt.title=`${n}: ${q} território${q>1?'s':''} quilombola${q>1?'s':''} (ITESP)`;
-  bt.onclick=()=>{if(munSel)map.removeLayer(munSel);munList.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===bt));
+  bt.onclick=()=>{if(bt.classList.contains('on')){munLimpa();return;}munLimpa();bt.classList.add('on');
     munSel=L.geoJSON(f,{pane:'selPane',interactive:false,style:{color:'#ffffff',weight:3,dashArray:'6 5',fill:false}}).addTo(map);
     map.flyToBounds(munSel.getBounds(),{padding:[30,30],duration:.8});
     if(matchMedia('(max-width:640px)').matches)document.getElementById('lyr').classList.add('closed');};
