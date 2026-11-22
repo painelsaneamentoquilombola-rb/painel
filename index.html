@@ -255,7 +255,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
       </div>
     </div>
   </section>
-  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), CETESB (hidrografia completa; fora de Barra do Turvo, os cursos d'água sem nome aparecem ao aproximar o mapa). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), CETESB (hidrografia completa; na vista da UGRHI inteira aparecem só os rios com nome, e os demais surgem ao aproximar). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
 
   <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
@@ -658,7 +658,7 @@ const ITESP_ID={'Cedro':'cedro','Reginaldo':'regi','Pedra Preta/Paraiso':'pppa',
 try{await Promise.all(['aquiferos','ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
 catch(e){document.getElementById('map').innerHTML='<p class="sub" style="padding:16px">Não foi possível carregar as camadas do mapa. O restante do painel segue funcionando.</p>';return;}
 // hidrografia: rios com nome na UGRHI inteira e todos os cursos d'água de Barra do Turvo (+2 km) sempre;
-// o restante da UGRHI 11 vem por blocos (mapa/hid/) quando o mapa é aproximado (zoom 12 ou mais)
+// o restante da UGRHI 11 vem por blocos (mapa/hid/) a partir do zoom 10
 GEO.hidrografia={type:'FeatureCollection',features:[]};
 try{for(const n of ['hidrografia','hidrografia_bt']){const r=await fetch('mapa/'+n+'.geojson');if(r.ok)GEO.hidrografia.features.push(...(await r.json()).features);}}catch(e){}
 let HIDIDX=[];try{const r=await fetch('mapa/hid/index.json');if(r.ok)HIDIDX=await r.json();}catch(e){}
@@ -687,11 +687,11 @@ for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,toleranc
   if(k!=='municipios'&&k!=='aquiferos')layers[k].addTo(map);
   if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
     defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
-// detalhe da hidrografia fora de Barra do Turvo, por blocos, só com zoom >= 12 (evita baixar 11 MB de uma vez)
-const HID_Z=12,hidOn=new Set(),DET=[];
+// detalhe da hidrografia fora de Barra do Turvo, por blocos, só com zoom >= 10 e só na área visível (evita baixar 11 MB de uma vez)
+const HID_Z=10,hidOn=new Set(),DET=[];
 const hidDet=L.geoJSON(null,{pane:'hidrografia',renderer:layers.hidrografia.options.renderer,interactive:false,style:style.hidrografia});
 function hidVis(){const ver=map.hasLayer(layers.hidrografia)&&map.getZoom()>=HID_Z;ver?map.addLayer(hidDet):map.removeLayer(hidDet);return ver;}
-async function hidLoad(){if(!hidVis())return;const v=map.getBounds().pad(.25);
+async function hidLoad(){if(!hidVis())return;const v=map.getBounds().pad(.1);
   for(const c of HIDIDX){if(hidOn.has(c.f))continue;const b=c.b;if(b[2]<v.getWest()||b[0]>v.getEast()||b[3]<v.getSouth()||b[1]>v.getNorth())continue;
     hidOn.add(c.f);try{const r=await fetch('mapa/hid/'+c.f+'.geojson');if(!r.ok)throw 0;const g=await r.json();g.features.forEach(f=>{f._b=bbox(f.geometry);DET.push(f);});hidDet.addData(g);}catch(e){hidOn.delete(c.f);}}}
 map.on('moveend',hidLoad);
