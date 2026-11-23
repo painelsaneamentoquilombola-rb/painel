@@ -182,6 +182,8 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .munlist button:hover,.munlist button.on{border-color:#0f5c4a;color:#0f5c4a}
 .munlist small{color:#5a6b64}
 .dlmsg{display:block;font-size:11.5px;color:#5a6b64;margin-top:2px}
+.lyr .opac{display:flex;justify-content:space-between;margin-top:6px;cursor:default}.lyr .opac output{font-family:var(--mono);font-size:11.5px;color:#5a6b64}
+#opac{width:100%;margin:2px 0 4px;accent-color:#0f5c4a;cursor:pointer}
 .lyr hr{border:0;border-top:1px solid #d8e1dc;margin:6px 0}
 .lyr .tg{display:none;width:100%;text-align:left;font-size:13px;padding:4px 8px}
 .lyr button.go{font-size:12.5px;padding:4px 8px;margin:2px 4px 2px 0;background:#f3f6f4;color:#15231e;border-color:#d8e1dc}
@@ -265,6 +267,8 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
         <label><input type="radio" name="bm" value="sat" checked>Satélite</label>
         <label><input type="radio" name="bm" value="ruas">Vias, ruas e estradas</label>
         <label><input type="radio" name="bm" value="topo">Topográfico, com relevo</label>
+        <label class="opac" for="opac">Opacidade da base <output id="opacv">100%</output></label>
+        <input type="range" id="opac" min="0" max="100" step="5" value="100" aria-label="Opacidade do mapa de fundo">
         <hr><button class="go" id="goBT">Barra do Turvo</button><button class="go" id="goUG">UGRHI 11 inteira</button>
         <hr><h4>Baixar o mapa</h4><button class="go" id="dlPNG">Imagem (PNG)</button><button class="go" id="dlPDF">PDF</button><span class="dlmsg" id="dlmsg"></span>
         </div>
@@ -742,7 +746,12 @@ document.querySelectorAll('.lyr input[data-l]').forEach(cb=>cb.onchange=()=>{con
   if(cb.dataset.l==='hidrografia')hidLoad();
   if(cb.dataset.l==='quilombos'){cb.checked?map.addLayer(labels):map.removeLayer(labels);}});
 document.getElementById('lb').onchange=updLabels;
-document.querySelectorAll('.lyr input[name=bm]').forEach(r=>r.onchange=()=>{for(const k in base)map.removeLayer(base[k]);base[r.value].addTo(map);if(base[r.value].bringToBack)base[r.value].bringToBack();});
+// opacidade do mapa de fundo (vale para os três fundos)
+let OPAC=1;
+const aplicaOpac=()=>{for(const k in base){const b=base[k];(b.eachLayer?(f=>b.eachLayer(f)):(f=>f(b)))(l=>l.setOpacity(OPAC));}};
+const opacEl=document.getElementById('opac'),opacV=document.getElementById('opacv');
+opacEl.oninput=()=>{OPAC=opacEl.value/100;opacV.textContent=opacEl.value+'%';aplicaOpac();};
+document.querySelectorAll('.lyr input[name=bm]').forEach(r=>r.onchange=()=>{for(const k in base)map.removeLayer(base[k]);base[r.value].addTo(map);aplicaOpac();if(base[r.value].bringToBack)base[r.value].bringToBack();});
 if(matchMedia('(max-width:640px)').matches)document.getElementById('lyr').classList.add('closed');
 document.getElementById('lyr-tg').onclick=()=>document.getElementById('lyr').classList.toggle('closed');
 L.DomEvent.disableClickPropagation(document.getElementById('lyr'));L.DomEvent.disableScrollPropagation(document.getElementById('lyr'));
@@ -811,7 +820,7 @@ async function montaMapa(){
       try{
         if(el.tagName==='svg'){const cl=el.cloneNode(true);cl.setAttribute('xmlns','http://www.w3.org/2000/svg');cl.setAttribute('width',r.width);cl.setAttribute('height',r.height);cl.style.transform='';
           const u=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(cl)],{type:'image/svg+xml'}));const im=await carregaImg(u);c.drawImage(im,x,y,r.width,r.height);URL.revokeObjectURL(u);}
-        else c.drawImage(el,x,y,r.width,r.height);
+        else{const fundo=el.tagName==='IMG'&&(p===map.getPane('tilePane')||p===map.getPane('ruasPane'));if(fundo)c.globalAlpha=OPAC;c.drawImage(el,x,y,r.width,r.height);c.globalAlpha=1;}
       }catch(e){}
     }}
   // escala gráfica e norte
