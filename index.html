@@ -184,6 +184,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .dlmsg{display:block;font-size:11.5px;color:#5a6b64;margin-top:2px}
 .lyr .opac{display:flex;justify-content:space-between;margin-top:6px;cursor:default}.lyr .opac output{font-family:var(--mono);font-size:11.5px;color:#5a6b64}
 #opac{width:100%;margin:2px 0 4px;accent-color:#0f5c4a;cursor:pointer}
+.lyr .grp{font-size:11px;font-weight:600;color:#5a6b64;margin:6px 0 1px}.lyr summary+.grp{margin-top:2px}
 .lyr hr{border:0;border-top:1px solid #d8e1dc;margin:6px 0}
 .lyr .tg{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;font-size:12.5px;font-weight:600;padding:3px 6px;margin:-2px 0 4px;background:transparent;border:0;color:#0f5c4a;cursor:pointer;flex:none}
 .lyr .bd{overflow-y:auto;overscroll-behavior:contain;min-height:0;margin-right:-6px;padding-right:6px}
@@ -247,25 +248,28 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
         <button class="tg" id="lyr-tg" aria-expanded="true"><span>Camadas e ferramentas</span><b>▴</b></button>
         <div class="bd">
         <details class="sec" open><summary>Camadas</summary>
-        <label><input type="checkbox" data-l="ucs" checked><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
+        <div class="grp">Território e sociedade</div>
         <label><input type="checkbox" data-l="quilombos" checked><span class="sw" style="background:#eb7300;border:1px solid #232323"></span>Territórios quilombolas</label>
-        <label><input type="checkbox" data-l="hidrografia" checked><span class="sw" style="border-top:2px solid #8c97e1;height:0;margin-top:1px"></span>UGRHI-11 - Hidrografia</label>
-        <label><input type="checkbox" data-l="subbacias" checked><span class="sw" style="border:2px solid #3da2f9"></span>Sub-bacias</label>
         <label><input type="checkbox" data-l="municipios"><span class="sw" style="background:rgba(190,178,151,.6);border:1px solid #232323"></span>Municípios com quilombos</label>
         <button type="button" class="mun-tg" id="mun-tg" aria-expanded="false">Ir para um município ▾</button>
         <div class="munlist" id="munlist" hidden></div>
-        <label><input type="checkbox" data-l="ugrhi" checked><span class="sw" style="border:3px solid #bfbfbf"></span>Limite da UGRHI 11</label>
-        <label><input type="checkbox" data-l="aquiferos"><span class="sw" style="background:linear-gradient(90deg,#f3d77a 0 20%,#d9a93f 20% 40%,#c7a6dc 40% 60%,#8f6bb8 60% 80%,#5fb3a3 80%);border:1px solid #6b6b6b"></span>Aquíferos</label>
-        <div class="aqleg" id="aqleg" hidden>
-          <span><i style="background:#f3d77a"></i>Litorâneo · classe 1s</span><span><i style="background:#d9a93f"></i>Litorâneo · classe 2s</span>
-          <span><i style="background:#c7a6dc"></i>Pré-cambriano · classe 2f</span><span><i style="background:#8f6bb8"></i>Pré-cambriano · classe 3f</span>
-          <span><i style="background:#5fb3a3"></i>Pré-cambriano cárstico · classe 4f</span>
-        </div>
         <label><input type="checkbox" data-l="idhm"><span class="sw" style="background:linear-gradient(90deg,#d4ece6 0 25%,#94cfc0 25% 50%,#4e9f8d 50% 75%,#1f6657 75%);border:1px solid #6b6b6b"></span>IDHM 2010 dos municípios</label>
         <div class="aqleg" id="idhleg" hidden>
           <span><i style="background:#1f6657"></i>0,730 a 0,759 · alto</span><span><i style="background:#4e9f8d"></i>0,700 a 0,729 · alto</span>
           <span><i style="background:#94cfc0"></i>0,670 a 0,699 · médio</span><span><i style="background:#d4ece6"></i>0,640 a 0,669 · médio</span>
           <span style="margin-top:2px">Parte de cada município dentro da UGRHI 11 · Brasil: 0,727</span>
+        </div>
+        <div class="grp">Áreas protegidas</div>
+        <label><input type="checkbox" data-l="ucs" checked><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
+        <div class="grp">Recursos hídricos</div>
+        <label><input type="checkbox" data-l="ugrhi" checked><span class="sw" style="border:3px solid #bfbfbf"></span>Limite da UGRHI 11</label>
+        <label><input type="checkbox" data-l="hidrografia" checked><span class="sw" style="border-top:2px solid #8c97e1;height:0;margin-top:1px"></span>UGRHI-11 - Hidrografia</label>
+        <label><input type="checkbox" data-l="subbacias" checked><span class="sw" style="border:2px solid #3da2f9"></span>Sub-bacias</label>
+        <label><input type="checkbox" data-l="aquiferos"><span class="sw" style="background:linear-gradient(90deg,#f3d77a 0 20%,#d9a93f 20% 40%,#c7a6dc 40% 60%,#8f6bb8 60% 80%,#5fb3a3 80%);border:1px solid #6b6b6b"></span>Aquíferos</label>
+        <div class="aqleg" id="aqleg" hidden>
+          <span><i style="background:#f3d77a"></i>Litorâneo · classe 1s</span><span><i style="background:#d9a93f"></i>Litorâneo · classe 2s</span>
+          <span><i style="background:#c7a6dc"></i>Pré-cambriano · classe 2f</span><span><i style="background:#8f6bb8"></i>Pré-cambriano · classe 3f</span>
+          <span><i style="background:#5fb3a3"></i>Pré-cambriano cárstico · classe 4f</span>
         </div>
         </details>
         <details class="sec" open><summary>Mapa de fundo</summary>
@@ -852,7 +856,7 @@ async function montaMapa(){
   c.fillStyle='#5a6b64';c.font='12.5px '+F;c.fillText('Vista gerada em '+new Date().toLocaleDateString('pt-BR'),L0,y);y+=26;
   c.fillStyle='#0f5c4a';c.font='500 10.5px "IBM Plex Mono",ui-monospace,monospace';c.fillText('LEGENDA',L0,y);y+=16;
   c.font='13px '+F;
-  for(const k of ['ucs','quilombos','hidrografia','subbacias','municipios','ugrhi','aquiferos','idhm']){
+  for(const k of ['quilombos','municipios','idhm','ucs','ugrhi','hidrografia','subbacias','aquiferos']){
     if(!map.hasLayer(layers[k]))continue;const [nome,des]=LEG[k];
     if(des){des(c,L0,y-10);c.fillStyle='#15231e';const ls=quebra(c,nome,larg-32);ls.forEach((l,i)=>c.fillText(l,L0+32,y+i*16));y+=ls.length*16+8;}
     else if(k==='idhm'){c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
