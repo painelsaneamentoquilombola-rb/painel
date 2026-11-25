@@ -259,14 +259,6 @@ body.fs-on{overflow:hidden}
       <h1>Saneamento nos quilombos de Barra do Turvo</h1>
       <p class="sub">Linha de base por comunidade · classificação PNSR · <span class="badge">dados oficiais 2022–2026 · vistoria pendente</span> <span class="badge acessos" id="gc-total" hidden title="Contagem anônima de acessos (GoatCounter), sem cookies"></span></p>
     </div>
-    <div class="controls">
-      <label for="f-comp" class="sub">Mostrar</label>
-      <select id="f-comp">
-        <option value="all">Todas as comunidades</option>
-        <option value="gap">Só com déficit PNSR</option>
-        <option value="nd">Só com lacuna de dado</option>
-      </select>
-    </div>
   </header>
 
   <section class="kpis" id="kpis" aria-label="Indicadores-resumo"></section>
@@ -505,12 +497,7 @@ function kpis(){
 }
 
 function grid(){
-  const f=document.getElementById("f-comp").value;
-  const rows=data.filter(d=>{
-    if(f==="all") return true;
-    const r=IND.map(k=>resumo(d.id,k));
-    return f==="gap"? r.some(x=>x.def>0) : r.some(x=>x.cls==="nd");
-  });
+  const rows=data;
   document.getElementById("grid").innerHTML=
    `<div class="row hd"><span>Comunidade</span>${IND.map(k=>`<span>${CURTO[k]}</span>`).join("")}<span>Dado</span></div>`+
    (rows.length?rows.map(d=>`<div class="row${d.id===sel?" sel":""}" tabindex="0" role="button" data-id="${d.id}" aria-label="Ver ficha de ${d.nome}">
@@ -609,7 +596,6 @@ function choose(id){if(sel===id)return;sel=id;try{localStorage.setItem("sq-sel",
 document.addEventListener("click",e=>{if(!e.target.closest(".cell")&&!e.target.closest(".tip")){pinned=null;tip.hidden=true;}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){pinned=null;tip.hidden=true;}});
 window.addEventListener("scroll",()=>{if(!pinned)tip.hidden=true;},{passive:true});
-document.getElementById("f-comp").addEventListener("change",grid);
 
 /* ---------- Exportação ---------- */
 const exList=document.getElementById("ex-list"),exAll=document.getElementById("ex-all"),exMsg=document.getElementById("ex-msg");
