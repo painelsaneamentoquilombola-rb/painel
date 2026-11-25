@@ -219,6 +219,24 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .logos img{height:76px;width:auto;display:block}
 .logos img.wide{height:84px}
 @media (max-width:480px){.logos img{height:58px}.logos img.wide{height:64px}}
+
+/* tela cheia e medição */
+.mapbox:fullscreen{height:100%!important;min-height:0;border-radius:0}
+.mapbox:fullscreen #map{border-radius:0}
+.mapbox.fs{position:fixed;inset:0;z-index:5000;height:auto!important;min-height:0;border-radius:0;border:0}
+.mapbox.fs #map{border-radius:0}
+body.fs-on{overflow:hidden}
+.ferr a{display:flex!important;align-items:center;justify-content:center;width:34px;height:34px;color:#15231e;cursor:pointer}
+.ferr a.on{background:#e1efe9;color:#0f5c4a}
+.ferr svg{width:18px;height:18px}
+.medbox{position:absolute;left:56px;top:10px;z-index:1000;background:rgba(255,255,255,.92);border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.3);padding:8px 10px;font-size:12.5px;color:#15231e;max-width:min(300px,calc(100% - 300px))}
+@media (max-width:640px){.medbox{max-width:calc(100% - 70px)}}
+.medbox .md{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.medbox button{font:inherit;font-size:12px;padding:3px 8px;border:1px solid #d8e1dc;background:#f3f6f4;color:#15231e;border-radius:5px;cursor:pointer}
+.medbox button.on{border-color:#0f5c4a;background:#e1efe9;color:#0f5c4a;font-weight:600}
+.medbox .res{font-family:var(--mono);font-size:13px;font-weight:500}
+.medbox .dica{color:#5a6b64;font-size:11.5px;margin-top:4px}
+.leaflet-container.medindo{cursor:crosshair}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -901,7 +919,54 @@ async function exporta(tipo){
 }
 document.getElementById('dlPNG').onclick=()=>exporta('png');
 document.getElementById('dlPDF').onclick=()=>exporta('pdf');
-map.on('click',e=>{mapClear();const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
+
+// ---------- Tela cheia e medição ----------
+const box=document.querySelector('.mapbox');
+const ICON={fs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  fsx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
+  med:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/></svg>'};
+const Ferr=L.Control.extend({options:{position:'topleft'},onAdd(){const d=L.DomUtil.create('div','leaflet-bar ferr');
+  d.innerHTML=`<a href="#" role="button" id="btFS" title="Tela cheia" aria-label="Tela cheia">${ICON.fs}</a><a href="#" role="button" id="btMed" title="Medir distância e área" aria-label="Medir distância e área">${ICON.med}</a>`;
+  L.DomEvent.disableClickPropagation(d);return d;}});
+map.addControl(new Ferr());
+const btFS=document.getElementById('btFS'),btMed=document.getElementById('btMed');
+const emTela=()=>document.fullscreenElement===box||box.classList.contains('fs');
+const marcaFS=()=>{const on=emTela();btFS.innerHTML=on?ICON.fsx:ICON.fs;btFS.title=on?'Sair da tela cheia':'Tela cheia';btFS.classList.toggle('on',on);document.body.classList.toggle('fs-on',box.classList.contains('fs'));setTimeout(()=>map.invalidateSize(),150);};
+btFS.onclick=e=>{e.preventDefault();
+  if(emTela()){if(document.fullscreenElement)document.exitFullscreen();else box.classList.remove('fs');marcaFS();return;}
+  if(box.requestFullscreen){box.requestFullscreen().then(marcaFS).catch(()=>{box.classList.add('fs');marcaFS();});}
+  else{box.classList.add('fs');marcaFS();}}; // celulares sem tela cheia nativa (iPhone): ocupa a tela toda dentro do navegador
+document.addEventListener('fullscreenchange',marcaFS);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&box.classList.contains('fs')){box.classList.remove('fs');marcaFS();}});
+// medição: distância (km) e área (ha e km²), geodésicas
+map.createPane('medPane');map.getPane('medPane').style.zIndex=480;map.getPane('medPane').style.pointerEvents='none';
+const medR=L.svg({pane:'medPane'});
+const MED={on:false,tipo:'dist',pts:[],fim:false,camada:L.layerGroup().addTo(map)};
+const medBox=document.createElement('div');medBox.className='medbox';medBox.hidden=true;
+medBox.innerHTML='<div class="md"><button type="button" data-t="dist" class="on">Distância</button><button type="button" data-t="area">Área</button><button type="button" data-a="fim">Concluir</button><button type="button" data-a="novo">Nova medida</button><button type="button" data-a="fechar">Fechar</button></div><div class="res" id="medRes">–</div><div class="dica" id="medDica"></div>';
+box.appendChild(medBox);L.DomEvent.disableClickPropagation(medBox);
+const fmt=(v,d)=>v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const areaGeo=ll=>{const R=6378137,r=Math.PI/180;let a=0;for(let i=0;i<ll.length;i++){const p=ll[i],q=ll[(i+1)%ll.length];a+=(q.lng-p.lng)*r*(2+Math.sin(p.lat*r)+Math.sin(q.lat*r));}return Math.abs(a*R*R/2);};
+function medDesenha(){MED.camada.clearLayers();const p=MED.pts;
+  p.forEach(x=>L.circleMarker(x,{pane:'medPane',renderer:medR,radius:4,color:'#fff',weight:2,fillColor:'#d6336c',fillOpacity:1,interactive:false}).addTo(MED.camada));
+  let txt='–';
+  if(MED.tipo==='dist'&&p.length>1){L.polyline(p,{pane:'medPane',renderer:medR,color:'#d6336c',weight:3,dashArray:'6 5',interactive:false}).addTo(MED.camada);
+    let d=0;for(let i=1;i<p.length;i++)d+=map.distance(p[i-1],p[i]);txt='Distância: '+(d>=1000?fmt(d/1000,2)+' km':fmt(d,0)+' m');}
+  if(MED.tipo==='area'&&p.length>1){(p.length>2?L.polygon(p,{pane:'medPane',renderer:medR,color:'#d6336c',weight:3,fillColor:'#d6336c',fillOpacity:.15,interactive:false}):L.polyline(p,{pane:'medPane',renderer:medR,color:'#d6336c',weight:3,interactive:false})).addTo(MED.camada);
+    if(p.length>2){const a=areaGeo(p);txt='Área: '+fmt(a/1e4,a<1e6?2:0)+' ha ('+fmt(a/1e6,2)+' km²)';}}
+  document.getElementById('medRes').textContent=txt;
+  document.getElementById('medDica').textContent=MED.fim?'Medida concluída. Use "Nova medida" para medir de novo.':(p.length?'Continue marcando pontos. Para terminar, use "Concluir" ou clique duas vezes no último ponto.':'Clique ou toque no mapa para marcar o primeiro ponto.');}
+const medNovo=()=>{MED.pts=[];MED.fim=false;medDesenha();};
+const medLiga=on=>{MED.on=on;medBox.hidden=!on;btMed.classList.toggle('on',on);mapEl.classList.toggle('medindo',on);on?map.doubleClickZoom.disable():map.doubleClickZoom.enable();if(!on)MED.camada.clearLayers();else{map.closePopup();medNovo();}};
+btMed.onclick=e=>{e.preventDefault();medLiga(!MED.on);};
+medBox.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.t){MED.tipo=b.dataset.t;medBox.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));medNovo();}
+  if(b.dataset.a==='fim'&&MED.pts.length){MED.fim=true;medDesenha();}if(b.dataset.a==='novo')medNovo();if(b.dataset.a==='fechar')medLiga(false);});
+map.on('click',e=>{if(!MED.on)return;if(MED.fim)medNovo();MED.pts.push(e.latlng);medDesenha();});
+map.on('dblclick',e=>{if(!MED.on)return;const p=MED.pts,cp=x=>map.latLngToContainerPoint(x);
+  while(p.length>1&&cp(p[p.length-1]).distanceTo(cp(p[p.length-2]))<8)p.pop(); // o duplo clique gera dois cliques no mesmo lugar
+  MED.fim=true;medDesenha();});
+map.on('click',e=>{if(MED.on)return;mapClear();const pt=[e.latlng.lng,e.latlng.lat];let h='',alvo=null;
   const rio=rioPerto(e.latlng);
   if(rio)h+=`<div class="k">Curso d'água (CETESB)</div><div class="v">${rio.properties.nome?nomeRio(rio.properties.nome):'Sem nome no cadastro'}</div>${rio.properties.classe?`<div class="s">Classe ${rio.properties.classe} de enquadramento (Decreto estadual 10.755/1977)</div>`:''}`;
   hit('quilombos',pt).forEach(f=>{const id=ITESP_ID[f.properties.comunidade];const d=id&&data.find(x=>x.id===id);if(d)alvo=id;
