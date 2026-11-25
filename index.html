@@ -267,7 +267,6 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
           <span><i style="background:#94cfc0"></i>0,670 a 0,699 · médio</span><span><i style="background:#d4ece6"></i>0,640 a 0,669 · médio</span>
           <span style="margin-top:2px">Parte de cada município dentro da UGRHI 11 · Brasil: 0,727</span>
         </div>
-        <label><input type="checkbox" id="lb" checked><span class="sw"></span>Nomes das comunidades</label>
         </details>
         <details class="sec" open><summary>Mapa de fundo</summary>
         <label><input type="radio" name="bm" value="sat" checked>Satélite</label>
@@ -740,7 +739,8 @@ const labels=L.layerGroup().addTo(map);
 GEO.quilombos.features.forEach(f=>{const c=L.geoJSON(f).getBounds().getCenter();
   L.tooltip({permanent:true,direction:'center',className:'lbl',interactive:false}).setLatLng(c).setContent(f.properties.comunidade).addTo(labels);});
 const mapEl=document.getElementById('map');
-const updLabels=()=>mapEl.classList.toggle('nolabels',map.getZoom()<10||!document.getElementById('lb').checked);
+// os nomes das comunidades acompanham a camada de territórios quilombolas (e aparecem a partir do zoom 10)
+const updLabels=()=>mapEl.classList.toggle('nolabels',map.getZoom()<10);
 map.on('zoomend',updLabels);
 const btF=GEO.quilombos.features.filter(f=>f.properties.municipio==='Barra do Turvo');
 const bt=L.geoJSON({type:'FeatureCollection',features:btF}).getBounds().pad(0.08);
@@ -752,7 +752,6 @@ document.querySelectorAll('.lyr input[data-l]').forEach(cb=>cb.onchange=()=>{con
   if(cb.dataset.l==='idhm')document.getElementById('idhleg').hidden=!cb.checked;
   if(cb.dataset.l==='hidrografia')hidLoad();
   if(cb.dataset.l==='quilombos'){cb.checked?map.addLayer(labels):map.removeLayer(labels);}});
-document.getElementById('lb').onchange=updLabels;
 // opacidade do mapa de fundo (vale para os três fundos)
 let OPAC=1;
 const aplicaOpac=()=>{for(const k in base){const b=base[k];(b.eachLayer?(f=>b.eachLayer(f)):(f=>f(b)))(l=>l.setOpacity(OPAC));}};
