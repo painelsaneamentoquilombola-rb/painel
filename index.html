@@ -387,7 +387,7 @@ body.fs-on{overflow:hidden}
   <footer class="f">
     <span>Fontes: IBGE, Censo Demográfico 2022, Quilombolas, Tabelas de resultado 12 e 13 (IBGE, 2024, p. 406, 422-423), domicílios com pelo menos um morador quilombola nos territórios oficialmente delimitados; ITESP (2026), famílias, área e reconhecimento; SINISA 2025, ano de referência 2024; ANA (2025), indicadores 6.1.1 e 6.2.1a; Contrato de Concessão 01/2024 da URAE-1; Funasa (2019), PNSR.</span>
     <span>A classificação PNSR é provisória: o Censo não informa potabilidade nem confirma se a fossa declarada é de fato séptica. A vistoria de campo confirma o tipo de fossa; a potabilidade segue como lacuna, porque o SISAGUA não tem amostras nas comunidades e esta pesquisa não faz coleta nem análise de água. Nenhuma informação identifica moradores ou lotes.</span>
-    <span>Produto técnico-tecnológico · ProfÁgua UNESP/FEIS · protótipo para a qualificação. O painel conta os acessos de forma anônima (GoatCounter), sem cookies e sem coletar dados pessoais.</span>
+    <span>Produto técnico-tecnológico · ProfÁgua UNESP/FEIS · protótipo para a qualificação. O painel conta os acessos de forma anônima (GoatCounter), sem cookies e sem coletar dados pessoais.<b id="gc-total" hidden></b></span>
   </footer>
 </div>
 
@@ -1040,6 +1040,15 @@ mapEl.addEventListener('click',e=>{const b=e.target.closest('[data-ficha]');if(!
 carregar().then(()=>{iniciar();avisoDados();});
 </script>
 
+<script>
+/* Contador público de acessos (GoatCounter). Some se o serviço não responder. */
+fetch("https://painelsaneamentoquilombola.goatcounter.com/counter/TOTAL.json")
+  .then(r=>r.ok?r.json():Promise.reject())
+  .then(d=>{const el=document.getElementById("gc-total");if(!el||!d.count)return;
+    const n=String(d.count).replace(/[\s,.\u202f]/g,"");
+    el.textContent=" Acessos até agora: "+Number(n).toLocaleString("pt-BR")+".";el.hidden=false;})
+  .catch(()=>{});
+</script>
 <script data-goatcounter="https://painelsaneamentoquilombola.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
