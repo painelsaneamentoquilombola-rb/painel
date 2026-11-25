@@ -237,6 +237,17 @@ body.fs-on{overflow:hidden}
 .medbox .res{font-family:var(--mono);font-size:13px;font-weight:500}
 .medbox .dica{color:#5a6b64;font-size:11.5px;margin-top:4px}
 .leaflet-container.medindo{cursor:crosshair}
+.medbox.busca input{font:inherit;font-size:13.5px;width:100%;padding:6px 8px;border:1px solid #d8e1dc;border-radius:6px;background:#fff;color:#15231e}
+.medbox.busca ul{list-style:none;margin:4px 0 0;padding:0;max-height:220px;overflow:auto}
+.medbox.busca li{padding:5px 6px;border-radius:5px;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.medbox.busca li small{color:#5a6b64;white-space:nowrap}
+.medbox.busca li:hover,.medbox.busca li.on{background:#e1efe9}
+.medbox.ajuda{max-width:min(360px,calc(100% - 70px))}
+.medbox.ajuda h5{margin:0;font-size:13px;color:#0f5c4a}
+.medbox.ajuda ul{margin:0 0 6px;padding-left:16px;display:grid;gap:4px;line-height:1.35}
+.medbox .topo{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.medbox .topo button{padding:1px 7px}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -376,7 +387,7 @@ body.fs-on{overflow:hidden}
   <footer class="f">
     <span>Fontes: IBGE, Censo Demográfico 2022, Quilombolas, Tabelas de resultado 12 e 13 (IBGE, 2024, p. 406, 422-423), domicílios com pelo menos um morador quilombola nos territórios oficialmente delimitados; ITESP (2026), famílias, área e reconhecimento; SINISA 2025, ano de referência 2024; ANA (2025), indicadores 6.1.1 e 6.2.1a; Contrato de Concessão 01/2024 da URAE-1; Funasa (2019), PNSR.</span>
     <span>A classificação PNSR é provisória: o Censo não informa potabilidade nem confirma se a fossa declarada é de fato séptica. A vistoria de campo confirma o tipo de fossa; a potabilidade segue como lacuna, porque o SISAGUA não tem amostras nas comunidades e esta pesquisa não faz coleta nem análise de água. Nenhuma informação identifica moradores ou lotes.</span>
-    <span>Produto técnico-tecnológico · ProfÁgua UNESP/FEIS · protótipo para a qualificação.</span>
+    <span>Produto técnico-tecnológico · ProfÁgua UNESP/FEIS · protótipo para a qualificação. O painel conta os acessos de forma anônima (GoatCounter), sem cookies e sem coletar dados pessoais.</span>
   </footer>
 </div>
 
@@ -924,9 +935,11 @@ document.getElementById('dlPDF').onclick=()=>exporta('pdf');
 const box=document.querySelector('.mapbox');
 const ICON={fs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
   fsx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
+  busca:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>',
+  ajuda:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.7"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>',
   med:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2M10 10l2 2M13 7l2 2"/></svg>'};
 const Ferr=L.Control.extend({options:{position:'topleft'},onAdd(){const d=L.DomUtil.create('div','leaflet-bar ferr');
-  d.innerHTML=`<a href="#" role="button" id="btFS" title="Tela cheia" aria-label="Tela cheia">${ICON.fs}</a><a href="#" role="button" id="btMed" title="Medir distância e área" aria-label="Medir distância e área">${ICON.med}</a>`;
+  d.innerHTML=`<a href="#" role="button" id="btBusca" title="Buscar território ou município" aria-label="Buscar território ou município">${ICON.busca}</a><a href="#" role="button" id="btFS" title="Tela cheia" aria-label="Tela cheia">${ICON.fs}</a><a href="#" role="button" id="btMed" title="Medir distância e área" aria-label="Medir distância e área">${ICON.med}</a><a href="#" role="button" id="btAjuda" title="Como usar o mapa" aria-label="Como usar o mapa">${ICON.ajuda}</a>`;
   L.DomEvent.disableClickPropagation(d);return d;}});
 map.addControl(new Ferr());
 const btFS=document.getElementById('btFS'),btMed=document.getElementById('btMed');
@@ -938,6 +951,44 @@ btFS.onclick=e=>{e.preventDefault();
   else{box.classList.add('fs');marcaFS();}}; // celulares sem tela cheia nativa (iPhone): ocupa a tela toda dentro do navegador
 document.addEventListener('fullscreenchange',marcaFS);
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&box.classList.contains('fs')){box.classList.remove('fs');marcaFS();}});
+// ---------- Busca de território ou município ----------
+const sem=t=>t.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const NOMEM={'Itaoca':'Itaóca'};
+const ITENS=[...GEO.quilombos.features.map(f=>({n:f.properties.comunidade.replace('Paraiso','Paraíso').replace('Colonia','Colônia'),s:'território · '+f.properties.municipio,f,t:'q'})),
+  ...GEO.idhm.features.map(f=>({n:NOMEM[f.properties.municipio]||f.properties.municipio,s:'município',f,t:'m'}))].sort((a,b)=>a.n.localeCompare(b.n,'pt'));
+const bBox=document.createElement('div');bBox.className='medbox busca';bBox.hidden=true;
+bBox.innerHTML='<div class="topo"><b style="font-size:12.5px;color:#0f5c4a">Buscar território ou município</b><button type="button" data-a="x" aria-label="Fechar busca">✕</button></div><input type="search" id="bIn" placeholder="Ex.: Mandira, Eldorado" autocomplete="off"><ul id="bLista"></ul>';
+box.appendChild(bBox);L.DomEvent.disableClickPropagation(bBox);L.DomEvent.disableScrollPropagation(bBox);
+const bIn=bBox.querySelector('#bIn'),bLista=bBox.querySelector('#bLista');let bSel=null,bAtual=[];
+const pontoDentro=f=>{const b=L.geoJSON(f).getBounds(),c=b.getCenter();if(inGeom([c.lng,c.lat],f.geometry))return c;
+  for(let i=1;i<12;i++)for(let j=1;j<12;j++){const la=b.getSouth()+(b.getNorth()-b.getSouth())*i/12,lo=b.getWest()+(b.getEast()-b.getWest())*j/12;if(inGeom([lo,la],f.geometry))return L.latLng(la,lo);}return c;};
+const btBusca=document.getElementById('btBusca'),btAjuda=document.getElementById('btAjuda');
+function bVai(it){if(bSel)map.removeLayer(bSel);
+  bSel=L.geoJSON(it.f,{pane:'selPane',interactive:false,style:{color:it.t==='q'?'#ffe14d':'#ffffff',weight:3,dashArray:it.t==='q'?null:'6 5',fill:false}}).addTo(map);
+  if(it.t==='q'&&!map.hasLayer(layers.quilombos)){const cb=document.querySelector('.lyr input[data-l=quilombos]');cb.checked=true;cb.onchange();}
+  map.flyToBounds(bSel.getBounds(),{padding:[40,40],maxZoom:it.t==='q'?13:11,duration:.8});
+  if(it.t==='q')map.once('moveend',()=>{const ll=pontoDentro(it.f);if(bSel){map.removeLayer(bSel);bSel=null;}map.fire('click',{latlng:ll});});
+  bBox.hidden=true;btBusca.classList.remove('on');}
+function bMostra(){const q=sem(bIn.value.trim());bAtual=(q?ITENS.filter(it=>sem(it.n).includes(q)):ITENS).slice(0,40);
+  bLista.innerHTML=bAtual.map((it,i)=>`<li data-i="${i}"${i===0&&q?' class="on"':''}><span>${it.n}</span><small>${it.s}</small></li>`).join('')||'<li style="cursor:default"><small>Nada encontrado.</small></li>';}
+bIn.addEventListener('input',bMostra);
+bIn.addEventListener('keydown',e=>{if(e.key==='Enter'&&bAtual[0]){e.preventDefault();bVai(bAtual[0]);}if(e.key==='Escape'){bBox.hidden=true;btBusca.classList.remove('on');}});
+map.on('click',()=>{if(bSel){map.removeLayer(bSel);bSel=null;}}); // destaque some ao clicar no mapa
+bLista.addEventListener('click',e=>{const li=e.target.closest('li[data-i]');if(li)bVai(bAtual[+li.dataset.i]);});
+// ---------- Guia rápido ----------
+const aBox=document.createElement('div');aBox.className='medbox ajuda';aBox.hidden=true;
+aBox.innerHTML=`<div class="topo"><h5>Como usar o mapa</h5><button type="button" data-a="x" aria-label="Fechar guia">✕</button></div><ul>
+<li><b>Clique num território</b> para ver a situação do saneamento da comunidade; em Barra do Turvo, a ficha completa fica abaixo do mapa.</li>
+<li>Em <b>Camadas e ferramentas</b> (canto direito), ligue e desligue as camadas, troque o mapa de fundo e ajuste a opacidade e a saturação.</li>
+<li>Os botões à esquerda servem para <b>buscar</b> um território ou município, ver o mapa em <b>tela cheia</b> e <b>medir</b> distâncias e áreas.</li>
+<li>Em <b>Baixar o mapa</b>, a vista atual sai em imagem ou PDF, com legenda, escala e fontes.</li></ul>
+<small style="color:#5a6b64">Passo a passo de atualização dos dados: <a href="https://github.com/painelsaneamentoquilombola-rb/painel#readme" target="_blank" rel="noopener">guia no GitHub</a>.</small>`;
+box.appendChild(aBox);L.DomEvent.disableClickPropagation(aBox);L.DomEvent.disableScrollPropagation(aBox);
+const fechaPaineis=exceto=>{if(exceto!=='b'){bBox.hidden=true;btBusca.classList.remove('on');}if(exceto!=='a'){aBox.hidden=true;btAjuda.classList.remove('on');}if(exceto!=='m'&&MED.on)medLiga(false);};
+btBusca.onclick=e=>{e.preventDefault();const abre=bBox.hidden;fechaPaineis('b');bBox.hidden=!abre;btBusca.classList.toggle('on',abre);if(abre){bIn.value='';bMostra();bIn.focus();}};
+btAjuda.onclick=e=>{e.preventDefault();const abre=aBox.hidden;fechaPaineis('a');aBox.hidden=!abre;btAjuda.classList.toggle('on',abre);};
+bBox.querySelector('[data-a=x]').onclick=()=>{bBox.hidden=true;btBusca.classList.remove('on');};
+aBox.querySelector('[data-a=x]').onclick=()=>{aBox.hidden=true;btAjuda.classList.remove('on');};
 // medição: distância (km) e área (ha e km²), geodésicas
 map.createPane('medPane');map.getPane('medPane').style.zIndex=480;map.getPane('medPane').style.pointerEvents='none';
 const medR=L.svg({pane:'medPane'});
@@ -958,7 +1009,7 @@ function medDesenha(){MED.camada.clearLayers();const p=MED.pts;
   document.getElementById('medDica').textContent=MED.fim?'Medida concluída. Use "Nova medida" para medir de novo.':(p.length?'Continue marcando pontos. Para terminar, use "Concluir" ou clique duas vezes no último ponto.':'Clique ou toque no mapa para marcar o primeiro ponto.');}
 const medNovo=()=>{MED.pts=[];MED.fim=false;medDesenha();};
 const medLiga=on=>{MED.on=on;medBox.hidden=!on;btMed.classList.toggle('on',on);mapEl.classList.toggle('medindo',on);on?map.doubleClickZoom.disable():map.doubleClickZoom.enable();if(!on)MED.camada.clearLayers();else{map.closePopup();medNovo();}};
-btMed.onclick=e=>{e.preventDefault();medLiga(!MED.on);};
+btMed.onclick=e=>{e.preventDefault();if(!MED.on)fechaPaineis('m');medLiga(!MED.on);};
 medBox.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.t){MED.tipo=b.dataset.t;medBox.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));medNovo();}
   if(b.dataset.a==='fim'&&MED.pts.length){MED.fim=true;medDesenha();}if(b.dataset.a==='novo')medNovo();if(b.dataset.a==='fechar')medLiga(false);});
@@ -989,5 +1040,6 @@ mapEl.addEventListener('click',e=>{const b=e.target.closest('[data-ficha]');if(!
 carregar().then(()=>{iniciar();avisoDados();});
 </script>
 
+<script data-goatcounter="https://painelsaneamentoquilombola.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
