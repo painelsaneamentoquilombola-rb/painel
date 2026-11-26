@@ -219,6 +219,11 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .ods .r{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 .ods img{width:72px;height:72px;display:block;border-radius:2px}
 .ods .dica{margin:0;font-size:12.5px;color:#5a6b64;text-align:center;max-width:60ch}
+.ods a{position:relative;display:block}
+.ods a::after{content:attr(data-tip) "\A" attr(data-metas);white-space:pre-line;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:240px;padding:8px 10px;border-radius:6px;background:#15231e;color:#fff;font-size:12px;line-height:1.35;text-align:left;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:opacity .15s;z-index:5}
+.ods a:hover::after,.ods a:focus-visible::after{opacity:1}
+.ods a:first-child::after{left:0;transform:none}.ods a:last-child::after{left:auto;right:0;transform:none}
+@media (hover:none){.ods a::after{display:none}}
 .ods a:hover img,.ods a:focus-visible img{outline:2px solid var(--line);outline-offset:2px}
 @media (max-width:480px){.ods{padding:12px 10px}.ods .r{gap:6px}.ods img{width:52px;height:52px}}
 .logos{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 20px;display:flex;flex-wrap:wrap;gap:20px 48px;align-items:flex-start;justify-content:center}
@@ -378,13 +383,13 @@ body.fs-on{overflow:hidden}
   <section class="ods" aria-label="Objetivos de Desenvolvimento Sustentável">
     <span class="t">Este painel contribui para os Objetivos de Desenvolvimento Sustentável</span>
     <div class="r">
-      <a href="https://brasil.un.org/pt-br/sdgs/3" target="_blank" rel="noopener" title="ODS 3 – Saúde e bem-estar"><img src="img/ods-03.png" alt="ODS 3 – Saúde e bem-estar"></a>
-      <a href="https://brasil.un.org/pt-br/sdgs/6" target="_blank" rel="noopener" title="ODS 6 – Água potável e saneamento"><img src="img/ods-06.png" alt="ODS 6 – Água potável e saneamento"></a>
-      <a href="https://brasil.un.org/pt-br/sdgs/10" target="_blank" rel="noopener" title="ODS 10 – Redução das desigualdades"><img src="img/ods-10.png" alt="ODS 10 – Redução das desigualdades"></a>
-      <a href="https://brasil.un.org/pt-br/sdgs/16" target="_blank" rel="noopener" title="ODS 16 – Paz, justiça e instituições eficazes"><img src="img/ods-16.png" alt="ODS 16 – Paz, justiça e instituições eficazes"></a>
-      <a href="https://www.gov.br/secretariageral/pt-br/cnods/camara-tematica/ods-18-igualdade-etnico-racial" target="_blank" rel="noopener" title="ODS 18 – Igualdade étnico-racial"><img src="img/ods-18.png" alt="ODS 18 – Igualdade étnico-racial"></a>
+      <a href="https://brasil.un.org/pt-br/sdgs/3" target="_blank" rel="noopener" aria-label="ODS 3 – Saúde e bem-estar. Meta ligada ao painel: 3.9, reduzir doenças causadas pela contaminação da água e do solo" data-tip="ODS 3 – Saúde e bem-estar" data-metas="Meta ligada ao painel: 3.9, reduzir doenças causadas pela contaminação da água e do solo"><img src="img/ods-03.png" alt="ODS 3 – Saúde e bem-estar"></a>
+      <a href="https://brasil.un.org/pt-br/sdgs/6" target="_blank" rel="noopener" aria-label="ODS 6 – Água potável e saneamento. Metas ligadas ao painel: 6.1, água potável para todos; 6.2, esgotamento sanitário adequado; 6.b, participação das comunidades na gestão da água e do saneamento" data-tip="ODS 6 – Água potável e saneamento" data-metas="Metas ligadas ao painel: 6.1, água potável para todos; 6.2, esgotamento sanitário adequado; 6.b, participação das comunidades na gestão da água e do saneamento"><img src="img/ods-06.png" alt="ODS 6 – Água potável e saneamento"></a>
+      <a href="https://brasil.un.org/pt-br/sdgs/10" target="_blank" rel="noopener" aria-label="ODS 10 – Redução das desigualdades. Meta ligada ao painel: 10.2, inclusão social de grupos historicamente excluídos" data-tip="ODS 10 – Redução das desigualdades" data-metas="Meta ligada ao painel: 10.2, inclusão social de grupos historicamente excluídos"><img src="img/ods-10.png" alt="ODS 10 – Redução das desigualdades"></a>
+      <a href="https://brasil.un.org/pt-br/sdgs/16" target="_blank" rel="noopener" aria-label="ODS 16 – Paz, justiça e instituições eficazes. Meta ligada ao painel: 16.6, instituições eficazes e transparentes" data-tip="ODS 16 – Paz, justiça e instituições eficazes" data-metas="Meta ligada ao painel: 16.6, instituições eficazes e transparentes"><img src="img/ods-16.png" alt="ODS 16 – Paz, justiça e instituições eficazes"></a>
+      <a href="https://www.gov.br/secretariageral/pt-br/cnods/camara-tematica/ods-18-igualdade-etnico-racial" target="_blank" rel="noopener" aria-label="ODS 18 – Igualdade étnico-racial. Metas ligadas ao painel: 18.5, reparação e territórios; 18.6, moradia adequada com serviços públicos, como água e esgoto; 18.9, participação nas decisões sobre os territórios" data-tip="ODS 18 – Igualdade étnico-racial" data-metas="Metas ligadas ao painel: 18.5, reparação e territórios; 18.6, moradia adequada com serviços públicos, como água e esgoto; 18.9, participação nas decisões sobre os territórios"><img src="img/ods-18.png" alt="ODS 18 – Igualdade étnico-racial"></a>
     </div>
-    <p class="dica">Clique em um ícone para conhecer o objetivo e todas as suas metas. As que se ligam a este painel são: 3.9 (doenças ligadas à água), 6.1, 6.2 e 6.b (água, esgoto e participação das comunidades), 10.2 (inclusão social), 16.6 (instituições transparentes) e 18.5, 18.6 e 18.9 (território, moradia com serviços públicos e participação nas decisões).</p>
+    <p class="dica">Clique em um ícone para conhecer o objetivo e todas as suas metas.</p>
   </section>
 
   <section class="logos" aria-label="Realização, fomento e apoio">
