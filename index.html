@@ -214,6 +214,12 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .pp .ver{color:#0f5c4a;margin-top:7px;display:block}
 .leaflet-popup-content{min-width:270px}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:rgba(255,255,255,.88);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.ods{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 20px;display:grid;gap:10px;justify-items:center;margin-bottom:12px}
+.ods .t{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5a6b64;text-align:center}
+.ods .r{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.ods img{width:72px;height:72px;display:block;border-radius:2px}
+.ods a:hover img,.ods a:focus-visible img{outline:2px solid var(--line);outline-offset:2px}
+@media (max-width:480px){.ods{padding:12px 10px}.ods .r{gap:6px}.ods img{width:52px;height:52px}}
 .logos{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 20px;display:flex;flex-wrap:wrap;gap:20px 48px;align-items:flex-start;justify-content:center}
 .logos .g{display:grid;gap:10px;justify-items:center}
 .logos .t{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#5a6b64}
@@ -366,6 +372,17 @@ body.fs-on{overflow:hidden}
     </div>
     <div id="ex-prev" class="prev" hidden></div>
     <p class="sub" style="margin:0">O relatório abre no navegador e pode ser impresso ou salvo em PDF. A planilha abre no Excel ou no Google Sheets. "Copiar tabela" cola direto no Word ou no Excel.</p>
+  </section>
+
+  <section class="ods" aria-label="Objetivos de Desenvolvimento Sustentável">
+    <span class="t">Este painel contribui para os Objetivos de Desenvolvimento Sustentável</span>
+    <div class="r">
+      <a href="https://brasil.un.org/pt-br/sdgs/3" target="_blank" rel="noopener" title="ODS 3 – Saúde e bem-estar"><img src="img/ods-03.png" alt="ODS 3 – Saúde e bem-estar"></a>
+      <a href="https://brasil.un.org/pt-br/sdgs/6" target="_blank" rel="noopener" title="ODS 6 – Água potável e saneamento"><img src="img/ods-06.png" alt="ODS 6 – Água potável e saneamento"></a>
+      <a href="https://brasil.un.org/pt-br/sdgs/10" target="_blank" rel="noopener" title="ODS 10 – Redução das desigualdades"><img src="img/ods-10.png" alt="ODS 10 – Redução das desigualdades"></a>
+      <a href="https://brasil.un.org/pt-br/sdgs/16" target="_blank" rel="noopener" title="ODS 16 – Paz, justiça e instituições eficazes"><img src="img/ods-16.png" alt="ODS 16 – Paz, justiça e instituições eficazes"></a>
+      <a href="https://www.gov.br/secretariageral/pt-br/cnods/camara-tematica/ods-18-igualdade-etnico-racial" target="_blank" rel="noopener" title="ODS 18 – Igualdade étnico-racial"><img src="img/ods-18.png" alt="ODS 18 – Igualdade étnico-racial"></a>
+    </div>
   </section>
 
   <section class="logos" aria-label="Realização, fomento e apoio">
