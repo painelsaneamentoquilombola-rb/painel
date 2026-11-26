@@ -281,10 +281,9 @@ body.fs-on{overflow:hidden}
           <span><i style="background:#94cfc0"></i>0,670 a 0,699 · médio</span><span><i style="background:#d4ece6"></i>0,640 a 0,669 · médio</span>
           <span style="margin-top:2px">Parte de cada município dentro da UGRHI 11 · Brasil: 0,727</span>
         </div>
-        <label><input type="checkbox" data-l="setores"><span class="sw" style="border:1.5px solid #d9b100;background:rgba(255,176,0,.25)"></span>Setores Censitários IBGE (2022)</label>
+        <label><input type="checkbox" data-l="setores"><span class="sw" style="border:1px solid #a3407a;background:linear-gradient(90deg,rgba(155,127,224,.6) 0 50%,rgba(217,107,166,.85) 50%)"></span>Setores Censitários IBGE (2022)</label>
         <div class="aqleg" id="setleg" hidden>
-          <span><i style="background:transparent;border:1.5px solid #d9b100"></i>Setor rural</span><span><i style="background:#ffffff;border:1px solid #9aa5a0"></i>Setor urbano</span>
-          <span><i style="background:rgba(255,176,0,.35);border:2px solid #ffb000"></i>Agrupamento quilombola (IBGE)</span>
+          <span><i style="background:rgba(155,127,224,.4);border:1px solid #ead98b"></i>Rural – URAE-1</span><span><i style="background:rgba(217,107,166,.7);border:1px solid #a3407a"></i>Urbano</span>
           <span id="setmsg" style="margin-top:2px">Malha do Censo 2022 recortada pela UGRHI 11</span>
         </div>
         <div class="grp">Áreas protegidas</div>
@@ -735,7 +734,8 @@ map.createPane('selPane');map.getPane('selPane').style.zIndex=465;map.getPane('s
 const AQ={'Classe 1s':'#f3d77a','Classe 2s':'#d9a93f','Classe 2f':'#c7a6dc','Classe 3f':'#8f6bb8','Classe 4f':'#5fb3a3'};
 const IDHC=v=>v>=.73?'#1f6657':v>=.70?'#4e9f8d':v>=.67?'#94cfc0':'#d4ece6';
 const style={idhm:f=>({color:'#3d5e57',weight:.8,fillColor:IDHC(f.properties.idhm),fillOpacity:.75}),aquiferos:f=>({color:'#5b5b5b',weight:.6,fillColor:AQ[f.properties.CLASSE]||'#cccccc',fillOpacity:.6}),ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
-  setores:f=>f.properties.t==='9'?{color:'#ffb000',weight:2.4,fillColor:'#ffb000',fillOpacity:.35}:f.properties.sit==='Urbana'?{color:'#ffffff',weight:1,fillColor:'#ffffff',fillOpacity:.35}:{color:'#ffd84d',weight:1.3,fill:false},
+  // estilo do QGIS (setores_estilo.qml): rural em lilás, urbano em rosa
+  setores:f=>f.properties.sit==='Urbana'?{color:'#a3407a',weight:1.1,opacity:1,fillColor:'#d96ba6',fillOpacity:.7}:{color:'#ead98b',weight:.8,opacity:.8,fillColor:'#9b7fe0',fillOpacity:.4},
   subbacias:{color:'#3da2f9',weight:1,fill:false},hidrografia:f=>({color:'#8c97e1',weight:f.properties.nome?1.4:.8,opacity:.95}),quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.8},
   ucs:{color:'#4fc982',weight:1.6,fillColor:'url(#hatch)',fillOpacity:1}};
 const layers={};
@@ -905,7 +905,7 @@ async function montaMapa(){
       for(const [cor,txt] of [['#1f6657','0,730 a 0,759 · alto'],['#4e9f8d','0,700 a 0,729 · alto'],['#94cfc0','0,670 a 0,699 · médio'],['#d4ece6','0,640 a 0,669 · médio']]){c.fillStyle=cor;c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#3d5e57';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}
       c.fillStyle='#5a6b64';c.fillText('Brasil: 0,727',L0+8,y);y+=21;}
     else if(k==='setores'){c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
-      for(const [st,txt] of [[{s:'#d9b100',f:null,w:1.5},'Setor rural'],[{s:'#9aa5a0',f:'rgba(255,255,255,.6)',w:1},'Setor urbano'],[{s:'#ffb000',f:'rgba(255,176,0,.35)',w:2},'Agrupamento quilombola (IBGE)']]){if(st.f){c.fillStyle=st.f;c.fillRect(L0+8,y-10,14,12);}c.strokeStyle=st.s;c.lineWidth=st.w;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
+      for(const [st,txt] of [[{s:'#ead98b',f:'rgba(155,127,224,.4)',w:1},'Rural – URAE-1'],[{s:'#a3407a',f:'rgba(217,107,166,.7)',w:1.2},'Urbano']]){if(st.f){c.fillStyle=st.f;c.fillRect(L0+8,y-10,14,12);}c.strokeStyle=st.s;c.lineWidth=st.w;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
     else{c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
       const vis=new Set(GEO.aquiferos.features.map(f=>f.properties.CLASSE));
       for(const [cl,txt] of Object.entries(AQN)){if(!vis.has(cl))continue;c.fillStyle=AQ[cl];c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#5b5b5b';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
