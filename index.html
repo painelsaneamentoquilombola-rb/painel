@@ -284,7 +284,7 @@ body.fs-on{overflow:hidden}
         </div>
         <label><input type="checkbox" data-l="setores"><span class="sw" style="border:1px solid #a3407a;background:linear-gradient(90deg,rgba(155,127,224,.6) 0 50%,rgba(217,107,166,.85) 50%)"></span>Setores Censitários IBGE (2022)</label>
         <div class="subl" id="setsub">
-          <label><input type="checkbox" data-s="Rural"><span class="sw" style="background:rgba(155,127,224,.4);border:1px solid #c9b860"></span>Rural – URAE-1</label>
+          <label><input type="checkbox" data-s="Rural"><span class="sw" style="background:rgba(155,127,224,.4);border:1px solid #c9b860"></span>Rural</label>
           <label><input type="checkbox" data-s="Urbana"><span class="sw" style="background:rgba(217,107,166,.7);border:1px solid #a3407a"></span>Urbano</label>
           <span class="setmsg" id="setmsg" hidden></span>
         </div>
@@ -316,7 +316,7 @@ body.fs-on{overflow:hidden}
       </div>
     </div>
   </section>
-  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010, último ano com dado por município), IBGE (limites municipais e setores censitários do Censo 2022, recortados pela UGRHI 11) e CETESB (hidrografia; de longe aparecem só os rios com nome, e ao aproximar o mapa aparecem todos os cursos d'água). Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010, último ano com dado por município), IBGE (limites municipais e setores censitários do Censo 2022, recortados pela UGRHI 11) e CETESB (hidrografia; de longe aparecem só os rios com nome, e ao aproximar o mapa aparecem todos os cursos d'água). Os setores censitários ajudam a identificar o que está no recorte rural do contrato da URAE-1, que segue a classificação do IBGE (setores de códigos de situação 4 a 8), mas não delimitam a área atendível: pelo contrato, ela abrange todo o município, e cabe à ARSESP ou ao Poder Concedente excluir parcelas rurais sem possibilidade legal ou técnica de atendimento. Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
 
   <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
@@ -917,7 +917,7 @@ async function montaMapa(){
       for(const [cor,txt] of [['#1f6657','0,730 a 0,759 · alto'],['#4e9f8d','0,700 a 0,729 · alto'],['#94cfc0','0,670 a 0,699 · médio'],['#d4ece6','0,640 a 0,669 · médio']]){c.fillStyle=cor;c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#3d5e57';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}
       c.fillStyle='#5a6b64';c.fillText('Brasil: 0,727',L0+8,y);y+=21;}
     else if(k==='setores'){c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
-      for(const [st,txt,sk] of [[{s:'#ead98b',f:'rgba(155,127,224,.4)',w:1},'Rural – URAE-1','Rural'],[{s:'#a3407a',f:'rgba(217,107,166,.7)',w:1.2},'Urbano','Urbana']]){if(!SETV[sk])continue;if(st.f){c.fillStyle=st.f;c.fillRect(L0+8,y-10,14,12);}c.strokeStyle=st.s;c.lineWidth=st.w;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
+      for(const [st,txt,sk] of [[{s:'#ead98b',f:'rgba(155,127,224,.4)',w:1},'Rural','Rural'],[{s:'#a3407a',f:'rgba(217,107,166,.7)',w:1.2},'Urbano','Urbana']]){if(!SETV[sk])continue;if(st.f){c.fillStyle=st.f;c.fillRect(L0+8,y-10,14,12);}c.strokeStyle=st.s;c.lineWidth=st.w;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
     else{c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
       const vis=new Set(GEO.aquiferos.features.map(f=>f.properties.CLASSE));
       for(const [cl,txt] of Object.entries(AQN)){if(!vis.has(cl))continue;c.fillStyle=AQ[cl];c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#5b5b5b';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
@@ -1043,7 +1043,7 @@ map.on('click',e=>{if(MED.on)return;mapClear();const pt=[e.latlng.lng,e.latlng.l
       <button class="ver" data-ficha="${d.id}">Abrir ficha completa ↓</button>`;});
   hit('ucs',pt).forEach(f=>h+=`<div class="k">Unidade de conservação</div><div class="v">${f.properties.Unidade}</div><div class="s">${f.properties.OrgaoGesto||''}</div>`);
   hit('subbacias',pt).forEach(f=>h+=`<div class="k">Sub-bacia</div><div class="v">${f.properties.DSUBBC}</div>`);
-  hit('setores',pt).filter(f=>SETV[f.properties.sit==='Urbana'?'Urbana':'Rural']).forEach(f=>{const a=f.properties;h+=`<div class="k">Setor censitário (IBGE, 2022)</div><div class="v">${a.cd}</div><div class="s">${a.mun}${a.dist&&a.dist!==a.mun?' · distrito de '+a.dist:''} · ${a.sit==='Urbana'?'urbano':'rural'}: ${a.csit.charAt(0).toLowerCase()+a.csit.slice(1)}${a.t!=='0'?'<br>Tipo: '+a.tipo:''}<br>Área: ${a.km2.toLocaleString('pt-BR')} km²</div>`;});
+  hit('setores',pt).filter(f=>SETV[f.properties.sit==='Urbana'?'Urbana':'Rural']).forEach(f=>{const a=f.properties;h+=`<div class="k">Setor censitário (IBGE, 2022)</div><div class="v">${a.cd}</div><div class="s">${a.mun}${a.dist&&a.dist!==a.mun?' · distrito de '+a.dist:''} · ${a.sit==='Urbana'?'urbano':'rural'}: ${a.csit.charAt(0).toLowerCase()+a.csit.slice(1)}${a.t!=='0'?'<br>Tipo: '+a.tipo:''}${a.sit==='Urbana'?'':'<br>Integra o recorte rural do contrato da URAE-1, que não define a área atendível.'}<br>Área: ${a.km2.toLocaleString('pt-BR')} km²</div>`;});
   hit('municipios',pt).forEach(f=>h+=`<div class="k">Município</div><div class="v">${f.properties.municipio}</div>`);
   hit('idhm',pt).forEach(f=>{const a=f.properties,fm=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:3});h+=`<div class="k">IDHM 2010 (Atlas Brasil)</div><div class="v">${a.municipio}: ${fm(a.idhm)} · ${a.faixa}</div><div class="s">${a.cbh?a.rank+'º entre os 23 municípios do CBH-RB':'Sede fora da UGRHI 11; não integra o CBH-RB'} · Brasil: 0,727</div>`;});
   hit('aquiferos',pt).forEach(f=>{const a=f.properties;h+=`<div class="k">Aquífero (SGB)</div><div class="v">${a.NOME_AQUI} (${a.SIGLA_AQUI}) · ${a.CLASSE.replace('Classe','classe')}</div><div class="s">Vazão provável por poço: ${a.VAZAO} m³/h<br>${a.TIPO_CARAC}<br>Rocha principal: ${a.ROCHA_PRIN}</div>`;});
