@@ -317,11 +317,11 @@ body.fs-on{overflow:hidden}
           <span style="margin-top:2px">Índice estadual (SIMA, 2022); classes lidas do mapa publicado</span>
         </div>
         <div class="grp">Áreas protegidas</div>
-        <label><input type="checkbox" data-l="ucs" checked><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
+        <label><input type="checkbox" data-l="ucs"><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
         <div class="grp">Recursos hídricos</div>
         <label><input type="checkbox" data-l="ugrhi" checked><span class="sw" style="border:3px solid #bfbfbf"></span>Limite da UGRHI 11</label>
-        <label><input type="checkbox" data-l="hidrografia" checked><span class="sw" style="border-top:2px solid #8c97e1;height:0;margin-top:1px"></span>UGRHI-11 - Hidrografia</label>
-        <label><input type="checkbox" data-l="subbacias" checked><span class="sw" style="border:1.5px solid #bfbfbf"></span>Sub-bacias</label>
+        <label><input type="checkbox" data-l="hidrografia"><span class="sw" style="border-top:2px solid #8c97e1;height:0;margin-top:1px"></span>UGRHI-11 - Hidrografia</label>
+        <label><input type="checkbox" data-l="subbacias"><span class="sw" style="border:2.5px solid #bfbfbf"></span>Sub-bacias</label>
         <label><input type="checkbox" data-l="aquiferos"><span class="sw" style="background:linear-gradient(90deg,#f3d77a 0 20%,#d9a93f 20% 40%,#c7a6dc 40% 60%,#8f6bb8 60% 80%,#5fb3a3 80%);border:1px solid #6b6b6b"></span>Aquíferos</label>
         <div class="aqleg" id="aqleg" hidden>
           <span><i style="background:#f3d77a"></i>Litorâneo · classe 1s</span><span><i style="background:#d9a93f"></i>Litorâneo · classe 2s</span>
@@ -779,7 +779,7 @@ const ICARC={'Muito baixa':'#ef442a','Baixa':'#fbab22','Moderada':'#f5ed19','Alt
 const style={icar:f=>({color:'#5b5b5b',weight:.8,fillColor:ICARC[f.properties.icar]||'#bdbdbd',fillOpacity:.72}),idhm:f=>({color:'#3d5e57',weight:.8,fillColor:IDHC(f.properties.idhm),fillOpacity:.75}),aquiferos:f=>({color:'#5b5b5b',weight:.6,fillColor:AQ[f.properties.CLASSE]||'#cccccc',fillOpacity:.6}),ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
   // estilo do QGIS (setores_estilo.qml): rural em lilás, urbano em rosa
   setores:f=>f.properties.sit==='Urbana'?{color:'#a3407a',weight:1.1,opacity:1,fillColor:'#d96ba6',fillOpacity:.7}:{color:'#ead98b',weight:.8,opacity:.8,fillColor:'#9b7fe0',fillOpacity:.4},
-  subbacias:{color:'#bfbfbf',weight:1,fill:false},hidrografia:f=>({color:'#8c97e1',weight:f.properties.nome?1.4:.8,opacity:.95}),quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.65},
+  subbacias:{color:'#bfbfbf',weight:2.2,fill:false},hidrografia:f=>({color:'#8c97e1',weight:f.properties.nome?1.4:.8,opacity:.95}),quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.65},
   ucs:{color:'#4fc982',weight:1.6,fillColor:'url(#hatch)',fillOpacity:1}};
 const layers={};
 for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,tolerance:0}):L.svg({pane:k}); // hidrografia em canvas: milhares de linhas, mais leve no celular
@@ -787,6 +787,8 @@ for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,toleranc
   if(k!=='municipios'&&k!=='aquiferos'&&k!=='idhm'&&k!=='icar'&&k!=='setores')layers[k].addTo(map);
   if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
     defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
+// na abertura ficam ligados só os territórios quilombolas e o limite da UGRHI
+for(const k of order){const cb=document.querySelector('.lyr input[data-l="'+k+'"]');if(cb&&!cb.checked&&map.hasLayer(layers[k]))map.removeLayer(layers[k]);}
 // cursos d'água sem nome: só com zoom >= 10 e só na área visível (evita baixar 12 MB de uma vez)
 const HID_Z=10,hidOn=new Set(),DET=[];
 const hidDet=L.geoJSON(null,{pane:'hidrografia',renderer:layers.hidrografia.options.renderer,interactive:false,style:style.hidrografia});
@@ -893,7 +895,7 @@ const LEG={
   ucs:['UCs de uso sustentável (DataGEO)',(c,x,y)=>{c.save();c.beginPath();c.rect(x,y,22,12);c.clip();c.strokeStyle='#4fc982';c.lineWidth=1.4;for(let i=-12;i<34;i+=5){c.beginPath();c.moveTo(x+i,y+12);c.lineTo(x+i+12,y);c.stroke();}c.restore();c.strokeStyle='#4fc982';c.lineWidth=1.5;c.strokeRect(x,y,22,12);}],
   quilombos:['Territórios quilombolas (ITESP)',(c,x,y)=>{c.fillStyle='rgba(235,115,0,.65)';c.fillRect(x,y,22,12);c.strokeStyle='#232323';c.lineWidth=1;c.strokeRect(x,y,22,12);}],
   hidrografia:['Hidrografia (CETESB)',(c,x,y)=>{c.strokeStyle='#8c97e1';c.lineWidth=2;c.beginPath();c.moveTo(x,y+6);c.lineTo(x+22,y+6);c.stroke();}],
-  subbacias:['Sub-bacias (DataGEO)',(c,x,y)=>{c.strokeStyle='#bfbfbf';c.lineWidth=1.5;c.strokeRect(x+1,y+1,20,10);}],
+  subbacias:['Sub-bacias (DataGEO)',(c,x,y)=>{c.strokeStyle='#bfbfbf';c.lineWidth=2.5;c.strokeRect(x+1,y+1,20,10);}],
   municipios:['Municípios com quilombos (ITESP)',(c,x,y)=>{c.fillStyle='rgba(190,178,151,.6)';c.fillRect(x,y,22,12);c.strokeStyle='#232323';c.lineWidth=1;c.strokeRect(x,y,22,12);}],
   ugrhi:['Limite da UGRHI 11 (SP Águas)',(c,x,y)=>{c.strokeStyle='#bfbfbf';c.lineWidth=3;c.strokeRect(x+1.5,y+1.5,19,9);}],
   aquiferos:['Aquíferos (Serviço Geológico do Brasil)',null],
