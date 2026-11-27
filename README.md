@@ -1,5 +1,7 @@
 # Painel de Saneamento Quilombola – Barra do Turvo (SP)
 
+[![DOI](https://zenodo.org/badge/github/1455380748.svg)](https://doi.org/10.5281/zenodo.24598993)
+
 Painel de dados sobre água, esgoto, resíduos sólidos e drenagem nas comunidades quilombolas de Barra do Turvo (Cedro, Reginaldo, Pedra Preta/Paraíso, Ribeirão Grande/Terra Seca e Ilhas), com classificação do atendimento segundo o Programa Nacional de Saneamento Rural (PNSR).
 
 Produto técnico-tecnológico da dissertação de mestrado de Luiz Henrique Dias Roman no Mestrado Profissional em Gestão e Regulação de Recursos Hídricos (ProfÁgua), UNESP/FEIS, sob orientação do Prof. Dr. Jefferson Nascimento de Oliveira.
@@ -76,6 +78,12 @@ Uma linha por fonte e componente. Os percentuais são da população (ou dos dom
 ## Fontes
 
 IBGE, Censo Demográfico 2022: Quilombolas (2024), Tabelas de resultado 12 e 13; ITESP (2026); SINISA 2025, ano de referência 2024; ANA (2025), indicadores ODS 6; Contrato de Concessão nº 01/2024 da URAE-1; Funasa (2019), PNSR, Quadro 4.1; Ministério da Saúde, SISAGUA (2026).
+
+## Como citar
+
+ROMAN, Luiz Henrique Dias. **Painel de Saneamento Quilombola – Barra do Turvo (SP)**. Zenodo, 2026. DOI: https://doi.org/10.5281/zenodo.24598993.
+
+Esse DOI reúne todas as versões e aponta sempre para a mais recente. Para citar uma versão específica, use o DOI dela, que aparece na página do registro no Zenodo (a versão 1.0.0, de novembro de 2026, é https://doi.org/10.5281/zenodo.24598994).
 
 ## Licença
 
