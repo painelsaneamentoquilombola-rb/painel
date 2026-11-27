@@ -178,6 +178,7 @@ footer.f{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
 .lyr input{accent-color:var(--gk);margin:0}
 .lyr .sw{width:20px;height:11px;border-radius:2px;flex:none}
 .aqleg{display:grid;gap:2px;margin:0 0 4px 27px;font-size:11.5px;color:var(--gm)}.aqleg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;border:1px solid rgba(0,0,0,.25)}
+.aqleg details.como{border:0;padding:0;margin-top:2px}.aqleg .como summary{font-size:11.5px;font-weight:600;color:var(--gk);cursor:pointer}.aqleg .como p{margin:3px 0 2px;font-size:11.5px;line-height:1.4;color:var(--gm)}
 .subl{margin:0 0 2px 27px;display:grid}.subl label{font-size:12.5px}.subl .sw{width:16px;height:9px}.setmsg{font-size:11.5px;color:var(--gm)}
 .mun-tg{font:inherit;font-size:12px;color:var(--gk);background:none;border:0;padding:0 0 2px 27px;cursor:pointer;text-align:left}
 .mun-tg:hover{text-decoration:underline}
@@ -315,6 +316,7 @@ body.fs-on{overflow:hidden}
         <div class="aqleg" id="icarleg" hidden>
           <span><i style="background:#ef442a"></i>Muito baixa</span><span><i style="background:#fbab22"></i>Baixa</span><span><i style="background:#f5ed19"></i>Moderada</span><span><i style="background:#89c542"></i>Alta</span><span><i style="background:#10ae4d"></i>Muito alta</span>
           <span style="margin-top:2px">Índice estadual (SIMA, 2022); classes lidas do mapa publicado</span>
+          <details class="como"><summary>Como ler</summary><p>O ICAR combina, com o mesmo peso, oito subíndices: governança, recursos financeiros, avaliação de risco, infraestrutura crítica, escolas e hospitais seguros, educação e percepção, proteção dos ecossistemas e sistemas de alerta e resposta a desastres. As cinco classes agrupam os municípios paulistas pelo método das quebras naturais. Quanto mais baixa a classe, menor a capacidade do município de se preparar e responder a eventos climáticos. Fonte: SIMA (2022); classes lidas do mapa publicado no estudo.</p></details>
         </div>
         <div class="grp">Áreas protegidas</div>
         <label><input type="checkbox" data-l="ucs"><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
