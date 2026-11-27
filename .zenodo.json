@@ -3,16 +3,39 @@
   "upload_type": "software",
   "description": "<p>Painel de dados sobre água, esgoto, resíduos sólidos e drenagem nas cinco comunidades quilombolas de Barra do Turvo (SP), na UGRHI 11 – Ribeira de Iguape e Litoral Sul. Classifica o atendimento de cada comunidade segundo o Programa Nacional de Saneamento Rural (PNSR) e mostra, lado a lado, as leituras do SINISA, dos indicadores do ODS 6 (ANA), do contrato de concessão da URAE-1 e do PMSB. Inclui mapa interativo com territórios quilombolas, municípios, IDHM, setores censitários, capacidade de adaptação climática (ICAR), unidades de conservação, hidrografia, sub-bacias e aquíferos.</p><p>Produto técnico-tecnológico da dissertação de mestrado no Mestrado Profissional em Gestão e Regulação de Recursos Hídricos (ProfÁgua), UNESP/FEIS. Versão publicada: https://painelsaneamentoquilombola-rb.github.io/painel/</p>",
   "creators": [
-    {"name": "Roman, Luiz Henrique Dias", "affiliation": "Universidade Estadual Paulista (UNESP), Faculdade de Engenharia de Ilha Solteira – ProfÁgua"}
+    {
+      "name": "Roman, Luiz Henrique Dias",
+      "affiliation": "Universidade Estadual Paulista (UNESP), Faculdade de Engenharia de Ilha Solteira – ProfÁgua",
+      "orcid": "0009-0006-2686-7843"
+    }
   ],
   "contributors": [
-    {"name": "Oliveira, Jefferson Nascimento de", "affiliation": "Universidade Estadual Paulista (UNESP), Faculdade de Engenharia de Ilha Solteira", "type": "Supervisor"}
+    {
+      "name": "Oliveira, Jefferson Nascimento de",
+      "affiliation": "Universidade Estadual Paulista (UNESP), Faculdade de Engenharia de Ilha Solteira",
+      "type": "Supervisor",
+      "orcid": "0000-0002-4453-6347"
+    }
   ],
-  "keywords": ["saneamento rural", "comunidades quilombolas", "PNSR", "regulação do saneamento", "painel de dados", "Vale do Ribeira", "UGRHI 11", "Barra do Turvo", "ProfÁgua"],
+  "keywords": [
+    "saneamento rural",
+    "comunidades quilombolas",
+    "PNSR",
+    "regulação do saneamento",
+    "painel de dados",
+    "Vale do Ribeira",
+    "UGRHI 11",
+    "Barra do Turvo",
+    "ProfÁgua"
+  ],
   "license": "cc-by-4.0",
   "language": "por",
   "related_identifiers": [
-    {"identifier": "https://painelsaneamentoquilombola-rb.github.io/painel/", "relation": "isDocumentedBy", "resource_type": "other"}
+    {
+      "identifier": "https://painelsaneamentoquilombola-rb.github.io/painel/",
+      "relation": "isDocumentedBy",
+      "resource_type": "other"
+    }
   ],
   "notes": "Fomento: CAPES e ANA (ProfÁgua). Apoio: CBH-RB."
 }
