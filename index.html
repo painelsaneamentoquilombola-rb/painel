@@ -310,6 +310,12 @@ body.fs-on{overflow:hidden}
           <label><input type="checkbox" data-s="Urbana"><span class="sw" style="background:rgba(217,107,166,.7);border:1px solid #a3407a"></span>Urbano</label>
           <span class="setmsg" id="setmsg" hidden></span>
         </div>
+        <div class="grp">Clima</div>
+        <label><input type="checkbox" data-l="icar"><span class="sw" style="background:linear-gradient(90deg,#ef442a 0 40%,#fbab22 40% 70%,#89c542 70%);border:1px solid #6b6b6b"></span>Capacidade de adaptação climática (ICAR)</label>
+        <div class="aqleg" id="icarleg" hidden>
+          <span><i style="background:#ef442a"></i>Muito baixa</span><span><i style="background:#fbab22"></i>Baixa</span><span><i style="background:#f5ed19"></i>Moderada</span><span><i style="background:#89c542"></i>Alta</span><span><i style="background:#10ae4d"></i>Muito alta</span><span><i style="background:#bdbdbd"></i>Não legível (Ilha Comprida)</span>
+          <span style="margin-top:2px">Índice estadual (SIMA, 2022); classes lidas do mapa publicado</span>
+        </div>
         <div class="grp">Áreas protegidas</div>
         <label><input type="checkbox" data-l="ucs" checked><span class="sw" style="background:repeating-linear-gradient(45deg,#4fc982 0 2px,transparent 2px 5px);border:1.5px solid #4fc982"></span>UCs de uso sustentável</label>
         <div class="grp">Recursos hídricos</div>
@@ -338,7 +344,7 @@ body.fs-on{overflow:hidden}
       </div>
     </div>
   </section>
-  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010, último ano com dado por município), IBGE (limites municipais e setores censitários do Censo 2022, recortados pela UGRHI 11) e CETESB (hidrografia; de longe aparecem só os rios com nome, e ao aproximar o mapa aparecem todos os cursos d'água). Os setores censitários ajudam a identificar o que está no recorte rural do contrato da URAE-1, que segue a classificação do IBGE (setores de códigos de situação 4 a 8), mas não delimitam a área atendível: pelo contrato, ela abrange todo o município, e cabe à ARSESP ou ao Poder Concedente excluir parcelas rurais sem possibilidade legal ou técnica de atendimento. Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
+  <p class="mapnote">Clique num território para ver a situação da comunidade. Camadas: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010, último ano com dado por município), SIMA/IPA (capacidade de adaptação climática, ICAR, com classes lidas do mapa do estudo de 2022), IBGE (limites municipais e setores censitários do Censo 2022, recortados pela UGRHI 11) e CETESB (hidrografia; de longe aparecem só os rios com nome, e ao aproximar o mapa aparecem todos os cursos d'água). Os setores censitários ajudam a identificar o que está no recorte rural do contrato da URAE-1, que segue a classificação do IBGE (setores de códigos de situação 4 a 8), mas não delimitam a área atendível: pelo contrato, ela abrange todo o município, e cabe à ARSESP ou ao Poder Concedente excluir parcelas rurais sem possibilidade legal ou técnica de atendimento. Role a página para a matriz PNSR com a ficha completa, o contexto do município e a exportação.</p>
 
   <div class="main" id="matriz">
     <section class="panel" aria-label="Situação por comunidade, segundo o PNSR">
@@ -744,7 +750,7 @@ kpis();grid();detail();
 const L=window.L; // Leaflet (o painel já usa o nome L para os rótulos das classes)
 const GEO={};
 const ITESP_ID={'Cedro':'cedro','Reginaldo':'regi','Pedra Preta/Paraiso':'pppa','Pedra Preta/Paraíso':'pppa','Ribeirão Grande/Terra Seca':'rgts','Bairro Ilhas':'ilhas','Ilhas':'ilhas'};
-try{await Promise.all(['aquiferos','idhm','ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
+try{await Promise.all(['aquiferos','icar','idhm','ugrhi','municipios','subbacias','quilombos','ucs'].map(async k=>{const r=await fetch('mapa/'+k+'.geojson');if(!r.ok)throw 0;GEO[k]=await r.json();}));}
 catch(e){document.getElementById('map').innerHTML='<p class="sub" style="padding:16px">Não foi possível carregar as camadas do mapa. O restante do painel segue funcionando.</p>';return;}
 // hidrografia, igual em toda a UGRHI 11: de longe, só os rios com nome; a partir do zoom 10, todos os cursos d'água.
 // Os trechos sem nome vêm dos blocos da pasta mapa/hid/ (bt.geojson cobre Barra do Turvo), só na área visível.
@@ -763,13 +769,14 @@ const base={
   topo:L.tileLayer(E+'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:18,crossOrigin:true,attribution:'Mapa: Esri, HERE, Garmin, © OpenStreetMap'})
 };
 base.sat.addTo(map);
-map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB, SGB, Atlas Brasil, IBGE');
-const order=['aquiferos','idhm','ugrhi','municipios','setores','subbacias','hidrografia','quilombos','ucs'];
+map.attributionControl.addAttribution('Dados: ITESP, DataGEO, SP Águas, CETESB, SGB, Atlas Brasil, SIMA, IBGE');
+const order=['aquiferos','icar','idhm','ugrhi','municipios','setores','subbacias','hidrografia','quilombos','ucs'];
 order.forEach((p,i)=>{map.createPane(p);map.getPane(p).style.zIndex=400+i*10;map.getPane(p).style.pointerEvents='none';});
 map.createPane('selPane');map.getPane('selPane').style.zIndex=465;map.getPane('selPane').style.pointerEvents='none';
 const AQ={'Classe 1s':'#f3d77a','Classe 2s':'#d9a93f','Classe 2f':'#c7a6dc','Classe 3f':'#8f6bb8','Classe 4f':'#5fb3a3'};
 const IDHC=v=>v>=.73?'#1f6657':v>=.70?'#4e9f8d':v>=.67?'#94cfc0':'#d4ece6';
-const style={idhm:f=>({color:'#3d5e57',weight:.8,fillColor:IDHC(f.properties.idhm),fillOpacity:.75}),aquiferos:f=>({color:'#5b5b5b',weight:.6,fillColor:AQ[f.properties.CLASSE]||'#cccccc',fillOpacity:.6}),ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
+const ICARC={'Muito baixa':'#ef442a','Baixa':'#fbab22','Moderada':'#f5ed19','Alta':'#89c542','Muito alta':'#10ae4d'};
+const style={icar:f=>({color:'#5b5b5b',weight:.8,fillColor:ICARC[f.properties.icar]||'#bdbdbd',fillOpacity:.72}),idhm:f=>({color:'#3d5e57',weight:.8,fillColor:IDHC(f.properties.idhm),fillOpacity:.75}),aquiferos:f=>({color:'#5b5b5b',weight:.6,fillColor:AQ[f.properties.CLASSE]||'#cccccc',fillOpacity:.6}),ugrhi:{color:'#bfbfbf',weight:3,fill:false},municipios:{color:'#232323',weight:.8,fillColor:'#beb297',fillOpacity:.45},
   // estilo do QGIS (setores_estilo.qml): rural em lilás, urbano em rosa
   setores:f=>f.properties.sit==='Urbana'?{color:'#a3407a',weight:1.1,opacity:1,fillColor:'#d96ba6',fillOpacity:.7}:{color:'#ead98b',weight:.8,opacity:.8,fillColor:'#9b7fe0',fillOpacity:.4},
   subbacias:{color:'#3da2f9',weight:1,fill:false},hidrografia:f=>({color:'#8c97e1',weight:f.properties.nome?1.4:.8,opacity:.95}),quilombos:{color:'#232323',weight:1,fillColor:'#eb7300',fillOpacity:.65},
@@ -777,7 +784,7 @@ const style={idhm:f=>({color:'#3d5e57',weight:.8,fillColor:IDHC(f.properties.idh
 const layers={};
 for(const k of order){const renderer=k==='hidrografia'?L.canvas({pane:k,tolerance:0}):L.svg({pane:k}); // hidrografia em canvas: milhares de linhas, mais leve no celular
   layers[k]=L.geoJSON(GEO[k],{pane:k,renderer,interactive:false,style:f=>typeof style[k]==='function'?style[k](f):style[k]});
-  if(k!=='municipios'&&k!=='aquiferos'&&k!=='idhm'&&k!=='setores')layers[k].addTo(map);
+  if(k!=='municipios'&&k!=='aquiferos'&&k!=='idhm'&&k!=='icar'&&k!=='setores')layers[k].addTo(map);
   if(k==='ucs'){const svg=renderer._container,ns='http://www.w3.org/2000/svg',defs=document.createElementNS(ns,'defs');
     defs.innerHTML='<pattern id="hatch" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#4fc982" stroke-width="1.6"/></pattern>';svg.insertBefore(defs,svg.firstChild);}}
 // cursos d'água sem nome: só com zoom >= 10 e só na área visível (evita baixar 12 MB de uma vez)
@@ -830,6 +837,7 @@ document.getElementById('goUG').onclick=()=>map.flyToBounds(layers.ugrhi.getBoun
 document.querySelectorAll('.lyr input[data-l]').forEach(cb=>cb.onchange=()=>{const l=layers[cb.dataset.l];cb.checked?map.addLayer(l):map.removeLayer(l);
   if(cb.dataset.l==='aquiferos')document.getElementById('aqleg').hidden=!cb.checked;
   if(cb.dataset.l==='idhm')document.getElementById('idhleg').hidden=!cb.checked;
+  if(cb.dataset.l==='icar')document.getElementById('icarleg').hidden=!cb.checked;
   if(cb.dataset.l==='setores'){const parcial=SETV.Rural!==SETV.Urbana;SETV.Rural=SETV.Urbana=parcial||cb.checked;setAplica();}
   if(cb.dataset.l==='hidrografia')hidLoad();
   if(cb.dataset.l==='quilombos'){cb.checked?map.addLayer(labels):map.removeLayer(labels);}});
@@ -890,7 +898,8 @@ const LEG={
   ugrhi:['Limite da UGRHI 11 (SP Águas)',(c,x,y)=>{c.strokeStyle='#bfbfbf';c.lineWidth=3;c.strokeRect(x+1.5,y+1.5,19,9);}],
   aquiferos:['Aquíferos (Serviço Geológico do Brasil)',null],
   idhm:['IDHM 2010 dos municípios (Atlas Brasil)',null],
-  setores:['Setores Censitários IBGE (2022)',null]
+  setores:['Setores Censitários IBGE (2022)',null],
+  icar:['Capacidade de adaptação climática – ICAR (SIMA, 2022)',null]
 };
 const AQN={'Classe 1s':'Litorâneo · classe 1s','Classe 2s':'Litorâneo · classe 2s','Classe 2f':'Pré-cambriano · classe 2f','Classe 3f':'Pré-cambriano · classe 3f','Classe 4f':'Pré-cambriano cárstico · classe 4f'};
 const FUNDO={sat:'Imagem de satélite: Esri, Maxar, Earthstar Geographics',ruas:'Mapa de vias: Esri, HERE, Garmin, © OpenStreetMap',topo:'Mapa topográfico: Esri, HERE, Garmin, © OpenStreetMap'};
@@ -944,12 +953,16 @@ async function montaMapa(){
   c.fillStyle='#5a6b64';c.font='12.5px '+F;c.fillText('Vista gerada em '+new Date().toLocaleDateString('pt-BR'),L0,y);y+=26;
   c.fillStyle='#0f5c4a';c.font='500 10.5px "IBM Plex Mono",ui-monospace,monospace';c.fillText('LEGENDA',L0,y);y+=16;
   c.font='13px '+F;
-  for(const k of ['quilombos','municipios','idhm','setores','ucs','ugrhi','hidrografia','subbacias','aquiferos']){
+  for(const k of ['quilombos','municipios','idhm','icar','setores','ucs','ugrhi','hidrografia','subbacias','aquiferos']){
     if(!map.hasLayer(layers[k]))continue;const [nome,des]=LEG[k];
     if(des){des(c,L0,y-10);c.fillStyle='#15231e';const ls=quebra(c,nome,larg-32);ls.forEach((l,i)=>c.fillText(l,L0+32,y+i*16));y+=ls.length*16+8;}
     else if(k==='idhm'){c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
       for(const [cor,txt] of [['#1f6657','0,730 a 0,759 · alto'],['#4e9f8d','0,700 a 0,729 · alto'],['#94cfc0','0,670 a 0,699 · médio'],['#d4ece6','0,640 a 0,669 · médio']]){c.fillStyle=cor;c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#3d5e57';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}
       c.fillStyle='#5a6b64';c.fillText('Brasil: 0,727',L0+8,y);y+=21;}
+    else if(k==='icar'){c.fillStyle='#15231e';const ls=quebra(c,nome,larg);ls.forEach((l,i)=>c.fillText(l,L0,y+i*16));y+=ls.length*16+2;
+      const vis=new Set(GEO.icar.features.map(f=>f.properties.icar));
+      for(const [cl,cor] of Object.entries(ICARC)){if(!vis.has(cl))continue;c.fillStyle=cor;c.fillRect(L0+8,y-10,14,12);c.strokeStyle='#5b5b5b';c.lineWidth=.6;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(cl,L0+32,y);y+=17;}
+      if(vis.has('Não legível')){c.fillStyle='#bdbdbd';c.fillRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText('Não legível no mapa do estudo',L0+32,y);y+=17;}y+=4;}
     else if(k==='setores'){c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
       for(const [st,txt,sk] of [[{s:'#ead98b',f:'rgba(155,127,224,.4)',w:1},'Rural','Rural'],[{s:'#a3407a',f:'rgba(217,107,166,.7)',w:1.2},'Urbano','Urbana']]){if(!SETV[sk])continue;if(st.f){c.fillStyle=st.f;c.fillRect(L0+8,y-10,14,12);}c.strokeStyle=st.s;c.lineWidth=st.w;c.strokeRect(L0+8,y-10,14,12);c.fillStyle='#15231e';c.fillText(txt,L0+32,y);y+=17;}y+=4;}
     else{c.fillStyle='#15231e';c.fillText(nome,L0,y);y+=18;
@@ -961,7 +974,7 @@ async function montaMapa(){
   y=Math.max(y+8,H-150);
   c.fillStyle='#5a6b64';c.font='11.5px '+F;
   const base=document.querySelector('.lyr input[name=bm]:checked').value;
-  const fontes=['Dados: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI 11), CETESB (hidrografia), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010) e IBGE (limites municipais e setores censitários do Censo 2022).',FUNDO[base]+'.','Coordenadas geográficas, WGS 84. Fonte: painelsaneamentoquilombola-rb.github.io/painel'];
+  const fontes=['Dados: ITESP (territórios e municípios), DataGEO (UCs e sub-bacias), SP Águas (UGRHI 11), CETESB (hidrografia), Serviço Geológico do Brasil (aquíferos), Atlas do Desenvolvimento Humano no Brasil (IDHM 2010), SIMA/IPA (ICAR, 2022) e IBGE (limites municipais e setores censitários do Censo 2022).',FUNDO[base]+'.','Coordenadas geográficas, WGS 84. Fonte: painelsaneamentoquilombola-rb.github.io/painel'];
   for(const t of fontes){for(const l of quebra(c,t,larg)){c.fillText(l,L0,y);y+=15;}y+=4;}
   return cv;}
 const dlMsg=document.getElementById('dlmsg');
@@ -1080,6 +1093,7 @@ map.on('click',e=>{if(MED.on)return;mapClear();const pt=[e.latlng.lng,e.latlng.l
   hit('setores',pt).filter(f=>SETV[f.properties.sit==='Urbana'?'Urbana':'Rural']).forEach(f=>{const a=f.properties;h+=`<div class="k">Setor censitário (IBGE, 2022)</div><div class="v">${a.cd}</div><div class="s">${a.mun}${a.dist&&a.dist!==a.mun?' · distrito de '+a.dist:''} · ${a.sit==='Urbana'?'urbano':'rural'}: ${a.csit.charAt(0).toLowerCase()+a.csit.slice(1)}${a.t!=='0'?'<br>Tipo: '+a.tipo:''}${a.sit==='Urbana'?'':'<br>Integra o recorte rural do contrato da URAE-1, que não define a área atendível.'}<br>Área: ${a.km2.toLocaleString('pt-BR')} km²</div>`;});
   hit('municipios',pt).forEach(f=>h+=`<div class="k">Município</div><div class="v">${f.properties.municipio}</div>`);
   hit('idhm',pt).forEach(f=>{const a=f.properties,fm=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:3});h+=`<div class="k">IDHM 2010 (Atlas Brasil)</div><div class="v">${a.municipio}: ${fm(a.idhm)} · ${a.faixa}</div><div class="s">${a.cbh?a.rank+'º entre os 23 municípios do CBH-RB':'Sede fora da UGRHI 11; não integra o CBH-RB'} · Brasil: 0,727</div>`;});
+  hit('icar',pt).forEach(f=>{const a=f.properties;h+=`<div class="k">Adaptação climática (ICAR)</div><div class="v">${a.municipio}: ${a.icar==='Não legível'?'classe não legível no mapa do estudo':a.icar.toLowerCase()+' capacidade'}</div><div class="s">Índice de Capacidade de Adaptação e de Resiliência às Mudanças Climáticas (SIMA, 2022). Classe lida do mapa publicado no estudo; o valor do índice não é divulgado.</div>`;});
   hit('aquiferos',pt).forEach(f=>{const a=f.properties;h+=`<div class="k">Aquífero (SGB)</div><div class="v">${a.NOME_AQUI} (${a.SIGLA_AQUI}) · ${a.CLASSE.replace('Classe','classe')}</div><div class="s">Vazão provável por poço: ${a.VAZAO} m³/h<br>${a.TIPO_CARAC}<br>Rocha principal: ${a.ROCHA_PRIN}</div>`;});
   if(!h)h='<div class="s">Fora das camadas ligadas.</div>';
   L.popup({maxWidth:340}).setLatLng(e.latlng).setContent(`<div class="pp">${h}</div>`).openOn(map);
